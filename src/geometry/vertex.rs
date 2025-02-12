@@ -1,60 +1,94 @@
 use num_traits::Float;
 
-pub struct Cartesian2D<T: Float> {
+pub struct Cartesian<T: Float> {
     pub x: T,
     pub y: T,
 }
 
-impl<T: Float> Cartesian2D<T> {
-    fn new(x: T, y: T) -> Cartesian2D<T> {
-        Cartesian2D { x, y }
+impl<T: Float> Cartesian<T> {
+    fn new(x: T, y: T) -> Cartesian<T> {
+        Cartesian { x, y }
     }
 }
 
-pub struct Vertex2D<T: Float> {
+pub struct Vertex<T: Float> {
     pub id: i32,
-    pub coords: Cartesian2D<T>,
+    pub coords: Cartesian<T>,
 }
 
-impl<T: Float> Vertex2D<T> {
-    pub fn new(id: i32, x: T, y: T) -> Vertex2D<T> {
-        Vertex2D {
+impl<T: Float> Vertex<T> {
+    pub fn new(id: i32, x: T, y: T) -> Vertex<T> {
+        Vertex {
             id: id, 
-            coords: Cartesian2D::new(x, y),
+            coords: Cartesian::new(x, y),
         }
     }
 }
 
-pub struct Line2D<T: Float> {
-    pub id: i32,
-    pub start: Vertex2D<T>,
-    pub end: Vertex2D<T>,
+pub struct Line<T: Float> {
+    pub start: Cartesian<T>,
+    pub end: Cartesian<T>,
 }
 
-pub struct Node2D<T: Float> {
-    pub id: i32,
-    pub north_face: Line2D<T>,
-    pub east_face: Line2D<T>,
-    pub south_face: Line2D<T>,
-    pub west_face: Line2D<T>,
-}
-
-impl<T: Float> Node2D<T> {
-    pub fn find_centre(&self) -> Cartesian2D<T> {
-        let four: T = T::from(4).unwrap();
-        let x: T = self.north_face.start.coords.x + 
-                   self.north_face.end.coords.x + 
-                   self.south_face.start.coords.x + 
-                   self.south_face.end.coords.x 
-                   / four;
-        let y: T = self.north_face.start.coords.y + 
-                   self.north_face.end.coords.y + 
-                   self.south_face.start.coords.y + 
-                   self.south_face.end.coords.y 
-                   / four;
-        Cartesian2D {
-            x: x,
-            y: y,
+impl<T: Float> Line<T> {
+    pub fn new(x1: T, y1: T, x2: T, y2: T) -> Line<T> {
+        Line {
+            start: Cartesian::new(x1, y1),
+            end: Cartesian::new(x2, y2),
         }
+    }
+
+    pub fn between_vertices(v1: Vertex<T>, v2: Vertex<T>) -> Line<T> {
+        let point1 = Cartesian::new(v1.coords.x, v1.coords.y);
+        let point2 = Cartesian::new(v2.coords.x, v2.coords.y);
+        Line {
+            start: point1,
+            end: point2,
+        }
+    }
+
+    pub fn gradient(&self) -> T {
+        let x_diff = self.end.x - self.start.x;
+        let y_diff = self.end.y - self.start.y;
+        y_diff / x_diff
+    }
+
+    pub fn length(&self) -> T {
+        let x_diff = self.end.x - self.start.x;
+        let y_diff = self.end.y - self.start.y;
+        (x_diff * x_diff + y_diff * y_diff).sqrt()
+    }
+}
+ 
+pub struct Node<T: Float> {
+    pub id: i32,
+    pub north_face: Line<T>,
+    pub east_face: Line<T>,
+    pub south_face: Line<T>,
+    pub west_face: Line<T>,
+}
+
+impl<T: Float> Node<T> {
+    pub fn find_centre(&self) -> Cartesian<T> {
+        let four: T = T::from(4).unwrap();
+        let x: T = self.north_face.start.x + 
+                   self.north_face.end.x + 
+                   self.south_face.start.x + 
+                   self.south_face.end.x 
+                   / four;
+        let y: T = self.north_face.start.y + 
+                   self.north_face.end.y + 
+                   self.south_face.start.y + 
+                   self.south_face.end.y 
+                   / four;
+        Cartesian {
+            x,
+            y,
+        }
+    }
+
+    pub fn check_orthogonality(&self) -> f64 {
+        // check if the interior diagonals are perpendicular
+        
     }
 }

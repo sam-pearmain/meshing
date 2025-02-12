@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use num_traits::Float;
 
 pub struct Cartesian<T: Float> {
@@ -71,24 +73,55 @@ pub struct Node<T: Float> {
 impl<T: Float> Node<T> {
     pub fn find_centre(&self) -> Cartesian<T> {
         let four: T = T::from(4).unwrap();
-        let x: T = self.north_face.start.x + 
+        let x_average: T = self.north_face.start.x + 
                    self.north_face.end.x + 
                    self.south_face.start.x + 
                    self.south_face.end.x 
                    / four;
-        let y: T = self.north_face.start.y + 
+        let y_average: T = self.north_face.start.y + 
                    self.north_face.end.y + 
                    self.south_face.start.y + 
                    self.south_face.end.y 
                    / four;
         Cartesian {
-            x,
-            y,
+            x: x_average,
+            y: y_average,
         }
     }
 
-    pub fn check_orthogonality(&self) -> f64 {
+    pub fn check_orthogonality(&self) {
         // check if the interior diagonals are perpendicular
         
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_vertex_creation() {
+        let vertex = Vertex {
+            id: 1,
+            coords: Cartesian { x: 1.0, y: 2.0 }
+        };
+
+        assert_eq!(vertex.id, 1);
+        assert_eq!(vertex.coords.x, 1.0);
+        assert_eq!(vertex.coords.y, 2.0);
+    }
+
+    #[test]
+    fn test_find_node_centre() {
+        let node = Node {
+            id: 1,
+            north_face: Line::new(0.0, 1.0, 1.0, 1.0),
+            east_face: Line::new(1.0, 1.0, 1.0, 0.0),
+            south_face: Line::new(1.0, 0.0, 0.0, 0.0),
+            west_face: Line::new(0.0, 0.0, 0.0, 1.0),
+        };
+        let centre = node.find_centre();
+        assert_eq!(centre.x, 0.5);
+        assert_eq!(centre.y, 0.5);
     }
 }

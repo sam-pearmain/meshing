@@ -1,7 +1,7 @@
 use num_traits::Float;
 
 pub struct Vertex<T: Float> {
-    id: i32,
-    x: T,
-    y: T,
+    pub id: i32,
+    pub x: T,
+    pub y: T,
 }

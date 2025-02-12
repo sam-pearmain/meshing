@@ -1,18 +1,17 @@
 #[cfg(test)]
 mod tests {
-    use crate::geometry::vertex::Vertex;
+    use crate::geometry::vertex::*;
 
     #[test]
     fn test_vertex_creation() {
-        let vertex = Vertex {
+        let vertex = Vertex2D {
             id: 1,
-            x: 0.0,
-            y: 0.0,
+            coords: Cartesian2D { x: 1.0, y: 2.0 }
         };
 
         assert_eq!(vertex.id, 1);
-        assert_eq!(vertex.x, 0.0);
-        assert_eq!(vertex.y, 0.0);
+        assert_eq!(vertex.coords.x, 0.0);
+        assert_eq!(vertex.coords.y, 0.0);
     }
 
     #[test]

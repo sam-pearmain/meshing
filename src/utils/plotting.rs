@@ -7,15 +7,14 @@ use plotters::drawing::DrawingArea;
 use plotters::backend::BitMapBackend;
 
 fn create_plot_context<'a>(
-    title: &str, 
+    title: &'a str, 
+    filename: &'a str,
     x_min: f64, 
     x_max: f64, 
     y_min: f64, 
     y_max: f64,
 ) -> Result<(DrawingArea<BitMapBackend<'a>, Shift>, ChartContext<'a, BitMapBackend<'a>, Cartesian2d<RangedCoordf64, RangedCoordf64>>), Box<dyn std::error::Error>> {
-    let filename = format!("{}.png", title.replace(" ", "_").to_lowercase());
-
-    let root = BitMapBackend::new(&filename, (1600, 800)).into_drawing_area();
+    let root = BitMapBackend::new(filename, (1600, 800)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let chart = ChartBuilder::on(&root)
@@ -40,7 +39,8 @@ fn calculate_ranges<T: Into<f64> + Copy>(values: &[T]) -> (f64, f64) {
 pub fn simple_scatter_plot<T: Into<f64> + Copy, U: Into<f64> + Copy>(
     x_data: &[T], 
     y_data: &[U], 
-    filename: &str
+    title: &str,
+    filename: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Validate input
     if x_data.len() != y_data.len() {
@@ -54,7 +54,7 @@ pub fn simple_scatter_plot<T: Into<f64> + Copy, U: Into<f64> + Copy>(
     let (y_min, y_max) = calculate_ranges(y_data);
 
     // Create plot
-    let (root, mut chart) = create_plot_context(filename, x_min, x_max, y_min, y_max)?;
+    let (root, mut chart) = create_plot_context(title, filename, x_min, x_max, y_min, y_max)?;
 
     // Configure and draw
     chart.configure_mesh().draw()?;
@@ -72,7 +72,8 @@ pub fn simple_scatter_plot<T: Into<f64> + Copy, U: Into<f64> + Copy>(
 pub fn simple_line_plot<T: Into<f64> + Copy, U: Into<f64> + Copy>(
     x_data: &[T], 
     y_data: &[U], 
-    filename: &str
+    title: &str,
+    filename: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Validate input
     if x_data.len() != y_data.len() {
@@ -86,7 +87,7 @@ pub fn simple_line_plot<T: Into<f64> + Copy, U: Into<f64> + Copy>(
     let (y_min, y_max) = calculate_ranges(y_data);
 
     // Create plot
-    let (root, mut chart) = create_plot_context(filename, x_min, x_max, y_min, y_max)?;
+    let (root, mut chart) = create_plot_context(title, filename, x_min, x_max, y_min, y_max)?;
 
     // Configure and draw
     chart.configure_mesh().draw()?;
@@ -109,7 +110,7 @@ mod tests {
         let x = vec![1, 2, 3, 4, 5];
         let y = vec![2.0, 4.0, 6.0, 8.0, 10.0];
         
-        let result = simple_scatter_plot(&x, &y, "scatter_test");
+        let result = simple_scatter_plot(&x, &y, "scatter-test", "scatter_test.png");
         assert!(result.is_ok());
         assert!(Path::new("scatter_test.png").exists());
     }
@@ -119,7 +120,7 @@ mod tests {
         let x: Vec<i32> = vec![1, 2, 3, 4, 5];
         let y: Vec<f64> = vec![2.0, 4.0, 6.0, 8.0, 10.0];
         
-        let result = simple_line_plot(&x, &y, "line_test");
+        let result = simple_line_plot(&x, &y, "line-test", "line_test.png");
         assert!(result.is_ok());
         assert!(Path::new("line_test.png").exists());
     }
@@ -129,10 +130,10 @@ mod tests {
         let x: Vec<i32> = vec![1, 2, 3];
         let y: Vec<f64> = vec![2.0, 4.0, 6.0, 8.0];
         
-        let scatter_result = simple_scatter_plot(&x, &y, "scatter_error");
+        let scatter_result = simple_scatter_plot(&x, &y, "scatter_error", "scatter_error.png");
         assert!(scatter_result.is_err());
 
-        let line_result = simple_line_plot(&x, &y, "line_error");
+        let line_result = simple_line_plot(&x, &y, "line_error", "line_error.png");
         assert!(line_result.is_err());
     }
 }

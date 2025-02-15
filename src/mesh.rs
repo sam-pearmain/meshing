@@ -43,7 +43,7 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
         let x: Vec<T> = raw_vertices.0;
         let y: Vec<T> = raw_vertices.1;
 
-        crate::utils::plotting::simple_scatter_plot(&x, &y, "mesh.png");
+        crate::utils::plotting::simple_scatter_plot(&x, &y, "mesh", "mesh.png").unwrap();
     }
 
     pub fn vertex_dump(&self, file_path: Option<&str>) {

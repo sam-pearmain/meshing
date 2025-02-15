@@ -17,6 +17,13 @@ pub struct Mesh<T: Float + Display> {
 }
 
 impl<T: Float + Display> Mesh<T> {
+    pub fn new() -> Mesh<T> {
+        Mesh {
+            vertices: Vec::new(),
+            lines: Vec::new(),
+        }
+    }
+
     pub fn draw(&self) {
         // TODO: implement this method
     }

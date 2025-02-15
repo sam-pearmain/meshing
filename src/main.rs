@@ -4,12 +4,12 @@ mod geometry;
 mod mesher;
 
 fn main() {
-    let mesh = mesher::Mesh::new();
+    let mut mesh = mesher::Mesh::new();
 
     mesh.create_mesh_2d(
         200, 
         100, 
-        2.0, 
+        2.0_f32, 
         mesher::WallDistribution::Uniform, 
         inlet_contour
     );

@@ -29,18 +29,18 @@ impl<T: Float + Display> Mesh<T> {
     }
 
     pub fn vertex_dump(&self, file_path: Option<&str>) {
-        let path = file_path.unwrap_or("vertex_dump.txt");
+        let path = file_path.unwrap_or("vertex-dump.txt");
         let mut file = File::create(path).expect("could not create file");
         
         for vertex in &self.vertices {
             // write to text file
-            writeln!(file, "vertex id: {}, x: {}, y: {}, z: {}", vertex.id, vertex.coords.x, vertex.coords.y, vertex.coords.z)
+            writeln!(file, "vertex id: {}, x: {:.4}, y: {:.4}, z: {:.4}", vertex.id, vertex.coords.x, vertex.coords.y, vertex.coords.z)
                 .expect("could not write to file");
         }
     }
 
     pub fn create_mesh_2d(
-        &self,
+        &mut self,
         nx: i32, // number of points in x
         ny: i32, // number of points in y
         lenx: T,
@@ -55,7 +55,6 @@ impl<T: Float + Display> Mesh<T> {
         let mut y: T = T::zero();
 
         // create empty vector to store vertices
-        let mut vertices: Vec<Vertex<T>> = Vec::new();
         let mut vertex_id: i32 = 0;
 
         match wall_distribution {
@@ -66,15 +65,16 @@ impl<T: Float + Display> Mesh<T> {
                     let dy: T = leny / (T::from(ny).unwrap() - T::one());
                     
                     for _ in 0..ny {
-                        // create vertex at current point (x, y) and push to vertex vec
+                        // create vertex at current point (x, y) and push to vertices
                         let vertex: Vertex<T> = Vertex::new(vertex_id, x, y, T::one());
-                        vertices.push(vertex);
+                        self.vertices.push(vertex);
 
                         // increment vertex id and step by dy
                         vertex_id += 1;
                         y = y + dy;
                     }
-                    // step by dx
+                    // reset y and step by dx
+                    y = T::zero();
                     x = x + dx;
                 }
             }

@@ -11,12 +11,12 @@ pub enum WallDistribution {
     HyperbolicTangent, 
 }
 
-pub struct Mesh<T: Float + Display> {
+pub struct Mesh<T: Float + Display + Into<f64> + Copy> {
     pub vertices: Vec<Vertex<T>>,
     pub lines: Vec<Line<T>>,
 }
 
-impl<T: Float + Display> Mesh<T> {
+impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
     pub fn new() -> Mesh<T> {
         Mesh {
             vertices: Vec::new(),
@@ -38,8 +38,12 @@ impl<T: Float + Display> Mesh<T> {
         (x, y, z)
     }
 
-    pub fn draw(&self) {
-        // TODO: implement this method
+    pub fn draw_mesh(&self) {
+        let raw_vertices = self.get_vertices();
+        let x: Vec<T> = raw_vertices.0;
+        let y: Vec<T> = raw_vertices.1;
+
+        crate::utils::plotting::simple_scatter_plot(&x, &y, "mesh.png");
     }
 
     pub fn vertex_dump(&self, file_path: Option<&str>) {

@@ -1,16 +1,17 @@
 use num_traits::Float;
 
 mod geometry;
-mod mesher;
+mod mesh;
+mod utils;
 
 fn main() {
-    let mut mesh = mesher::Mesh::new();
+    let mut mesh = mesh::Mesh::new();
 
     mesh.create_mesh_2d(
         200, 
         100, 
         2.0_f32, 
-        mesher::WallDistribution::Uniform, 
+        mesh::WallDistribution::Uniform, 
         inlet_contour
     );
 

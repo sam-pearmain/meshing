@@ -14,7 +14,7 @@ fn create_plot_context<'a>(
     y_min: f64, 
     y_max: f64,
 ) -> Result<(DrawingArea<BitMapBackend<'a>, Shift>, ChartContext<'a, BitMapBackend<'a>, Cartesian2d<RangedCoordf64, RangedCoordf64>>), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new(filename, (1600, 800)).into_drawing_area();
+    let root = BitMapBackend::new(filename, (2560, 1440)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let chart = ChartBuilder::on(&root)

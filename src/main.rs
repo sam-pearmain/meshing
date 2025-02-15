@@ -16,8 +16,9 @@ fn main() {
     );
 
     mesh.vertex_dump(None);
+    mesh.draw_mesh();
 }
 
 fn inlet_contour<T: Float>(x: T) -> T {
-    T::from(2.0).unwrap() * x + T::from(1.0).unwrap()
+    T::one() - (T::one() / T::from(10.0).unwrap() * x.powi(2))
 }

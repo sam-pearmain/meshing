@@ -24,6 +24,20 @@ impl<T: Float + Display> Mesh<T> {
         }
     }
 
+    pub fn get_vertices(&self) -> (Vec<T>, Vec<T>, Vec<T>) {
+        let mut x: Vec<T> = Vec::new();
+        let mut y: Vec<T> = Vec::new();
+        let mut z: Vec<T> = Vec::new();
+
+        for vertex in &self.vertices {
+            x.push(vertex.coords.x);
+            y.push(vertex.coords.y);
+            z.push(vertex.coords.z);
+        }
+
+        (x, y, z)
+    }
+
     pub fn draw(&self) {
         // TODO: implement this method
     }

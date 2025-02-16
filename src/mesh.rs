@@ -41,26 +41,12 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
             .find(|&v| v.id == id)
     }
 
-    pub fn get_vertices(&self) -> (Vec<T>, Vec<T>, Vec<T>) {
-        let mut x: Vec<T> = Vec::new();
-        let mut y: Vec<T> = Vec::new();
-        let mut z: Vec<T> = Vec::new();
-
-        for vertex in &self.vertices {
-            x.push(vertex.coords.x);
-            y.push(vertex.coords.y);
-            z.push(vertex.coords.z);
-        }
-
-        (x, y, z)
-    }
-
-    pub fn get_adjacent_vertex(&self, id: i32, direction: Direction) -> Option<&Vertex<T>> {
+    pub fn find_adjacent_vertex(&self, id: i32, direction: Direction) -> Option<&Vertex<T>> {
         // check if the given vertex exists 
-        let current_vertex = self.find_vertex(id).expect("vertex does not exist");
+        let current_vertex: &Vertex<T> = self.find_vertex(id)?;
 
         // calculate the adjacent vertex id based on given direction
-        let adjacent_id = match direction {
+        let adjacent_id: i32 = match direction {
             Direction::North => {
                 // check if we are at the top boundary
                 if current_vertex.id % self.ny == self.ny - 1 {
@@ -93,23 +79,36 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
         self.find_vertex(adjacent_id)
     }
 
-    pub fn draw_mesh(&self) {
-        let raw_vertices = self.get_vertices();
-        let x: Vec<T> = raw_vertices.0;
-        let y: Vec<T> = raw_vertices.1;
+    pub fn get_vertices(&self) -> (Vec<T>, Vec<T>, Vec<T>) {
+        let mut x: Vec<T> = Vec::new();
+        let mut y: Vec<T> = Vec::new();
+        let mut z: Vec<T> = Vec::new();
 
+        for vertex in &self.vertices {
+            x.push(vertex.coords.x);
+            y.push(vertex.coords.y);
+            z.push(vertex.coords.z);
+        }
+
+        (x, y, z)
+    }
+
+    pub fn draw_mesh(&self) {
+        let (x, y, _) = self.get_vertices();
         crate::utils::plotting::simple_scatter_plot(&x, &y, "mesh", "mesh.png").unwrap();
     }
 
-    pub fn vertex_dump(&self, file_path: Option<&str>) {
+    pub fn vertex_dump(&self, file_path: Option<&str>) -> std::io::Result<()> {
         let path = file_path.unwrap_or("vertex-dump.txt");
-        let mut file = File::create(path).expect("could not create file");
+        let mut file = File::create(path)?;
         
         for vertex in &self.vertices {
             // write to text file
-            writeln!(file, "vertex id: {}, x: {:.4}, y: {:.4}, z: {:.4}", vertex.id, vertex.coords.x, vertex.coords.y, vertex.coords.z)
-                .expect("could not write to file");
+            writeln!(file, "vertex id: {}, x: {:.4}, y: {:.4}, z: {:.4}",
+                vertex.id, vertex.coords.x, vertex.coords.y, vertex.coords.z
+            )?;   
         }
+        Ok(())
     }
 
     pub fn create_mesh_2d(
@@ -152,7 +151,33 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
                 }
             }
             WallDistribution::HyperbolicTangent => {
-                // todo
+                let beta: T = T::from(2.0).unwrap(); // controls point clustering (higher = more clustering)
+
+                for _ in 0..nx {
+                    // calculate domain height at current x position
+                    let leny: T = inlet_contour(x);
+
+                    for j in 0..ny {
+                        // calculate normalised coordinate eta between 0 and 1
+                        let eta: T = T::from(j).unwrap() / T::from(ny - 1).unwrap();
+
+                        // apply hyperbolic tangent distribution
+                        // y(eta) = leny * (1 + tanh(beta * (eta - 0.5)) / tanh(beta / 2))
+                        let tanh_term = 
+                            (beta * (eta - T::from(0.5).unwrap())). tanh() / 
+                            (beta * T::from(0.5).unwrap()).tanh();
+                        let y = leny * (T::one() + tanh_term);
+
+                        // create vertex at current point (x, y)
+                        let vertex = Vertex::new(vertex_id, x, y, T::one());
+                        self.vertices.push(vertex);
+
+                        // increment vertex id
+                        vertex_id += 1;
+                    }
+                    // step in x direction
+                    x = x + dx;
+                }
             } 
         }
     }

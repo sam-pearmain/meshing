@@ -15,7 +15,7 @@ fn main() {
         inlet_contour
     );
 
-    mesh.vertex_dump(None);
+    mesh.vertex_dump(None).expect("failed to dump vertices");
     mesh.draw_mesh();
 }
 

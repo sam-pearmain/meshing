@@ -39,7 +39,7 @@ fn main() {
         2.0_f64, 
         mesh::WallDistribution::TopClusteredTangent, 
         inlet_contour, 
-        Some(4.0)
+        Some(2.0)
     );
     mesh_3.draw_mesh("mesh-top-tanh.png");
 }

@@ -209,4 +209,8 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
             }
         }
     }
+
+    pub fn export_stl(&self, filename: &str) {
+        
+    }
 }

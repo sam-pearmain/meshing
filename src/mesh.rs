@@ -56,21 +56,41 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
     }
 
     pub fn get_adjacent_vertex(&self, id: i32, direction: Direction) -> Option<&Vertex<T>> {
-        // if returns Option::None then vertex lies on a boundary
-        match direction {
+        // check if the given vertex exists 
+        let current_vertex = self.find_vertex(id).expect("vertex does not exist");
+
+        // calculate the adjacent vertex id based on given direction
+        let adjacent_id = match direction {
             Direction::North => {
-                self.find_vertex(id + 1)
+                // check if we are at the top boundary
+                if current_vertex.id % self.ny == self.ny - 1 {
+                    return None;
+                }
+                id + 1
             }
             Direction::South => {
-                self.find_vertex(id - 1)
+                // check if we are at the bottom boundary
+                if current_vertex.id % self.ny == 0 {
+                    return None;
+                }
+                id - 1
             }
             Direction::East => {
-                self.find_vertex(id + self.ny)
+                // check if we are at the right boundary
+                if current_vertex.id >= (self.nx - 1) * self.ny {
+                    return None;
+                }
+                id + self.ny
             }
             Direction::West => {
-                self.find_vertex(id - self.ny)
+                // check if we are at the left boundary
+                if current_vertex.id < self.ny {
+                    return None;
+                }
+                id - self.ny
             }
-        }
+        };
+        self.find_vertex(adjacent_id)
     }
 
     pub fn draw_mesh(&self) {

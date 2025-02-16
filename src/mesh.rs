@@ -93,9 +93,9 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
         (x, y, z)
     }
 
-    pub fn draw_mesh(&self) {
+    pub fn draw_mesh(&self, filename: &str) {
         let (x, y, _) = self.get_vertices();
-        crate::utils::plotting::simple_scatter_plot(&x, &y, "mesh", "mesh.png").unwrap();
+        crate::utils::plotting::simple_scatter_plot(&x, &y, "mesh", filename).unwrap();
     }
 
     pub fn vertex_dump(&self, file_path: Option<&str>) -> std::io::Result<()> {
@@ -118,6 +118,7 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
         lenx: T,
         wall_distribution: WallDistribution,
         inlet_contour: impl Fn(T) -> T,
+        beta: Option<T>, // controls point clustering (higher = more clustering)
     ) {
         // calculate delta x (delta y will vary depending on the inlet contour function and the wall distribution)
         let dx: T = lenx / (T::from(nx).unwrap() - T::one());
@@ -151,7 +152,7 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
                 }
             }
             WallDistribution::HyperbolicTangent => {
-                let beta: T = T::from(2.0).unwrap(); // controls point clustering (higher = more clustering)
+                let beta: T = beta.unwrap_or(T::from(2.0).unwrap());
 
                 for _ in 0..nx {
                     // calculate domain height at current x position

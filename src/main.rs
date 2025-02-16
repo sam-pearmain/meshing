@@ -27,10 +27,21 @@ fn main() {
         2.0_f64, 
         mesh::WallDistribution::HyperbolicTangent, 
         inlet_contour, 
-        None
+        Some(5.0)
     );
-
     mesh_2.draw_mesh("mesh-tanh.png");
+
+    let mut mesh_3 = mesh::Mesh::new();
+
+    mesh_3.create_mesh_2d(
+        200, 
+        100, 
+        2.0_f64, 
+        mesh::WallDistribution::TopClusteredTangent, 
+        inlet_contour, 
+        Some(4.0)
+    );
+    mesh_3.draw_mesh("mesh-top-tanh.png");
 }
 
 fn inlet_contour<T: Float>(x: T) -> T {

@@ -9,6 +9,7 @@ use crate::geometry::*;
 pub enum WallDistribution {
     Uniform, 
     HyperbolicTangent, 
+    TopClusteredTangent,
 }
 
 pub enum Direction {
@@ -170,7 +171,7 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
                         let y = leny * (T::one() + tanh_term);
 
                         // create vertex at current point (x, y)
-                        let vertex = Vertex::new(vertex_id, x, y, T::one());
+                        let vertex: Vertex<T> = Vertex::new(vertex_id, x, y, T::one());
                         self.vertices.push(vertex);
 
                         // increment vertex id
@@ -180,6 +181,32 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
                     x = x + dx;
                 }
             } 
+            WallDistribution::TopClusteredTangent => {
+                let beta: T = beta.unwrap_or(T::from(2.0).unwrap());
+
+                for _ in 0..nx {
+                    // calculate domain height at current x position
+                    let leny: T = inlet_contour(x);
+
+                    for j in 0..ny {
+                        // calculate normalised coordinate eta between 0 and 1
+                        let eta: T = T::from(j).unwrap() / T::from(ny - 1).unwrap();
+                        
+                        // top-boundary-clustered distribution
+                        let tanh_term = (beta * eta).tanh() / beta.tanh();
+                        y = leny * tanh_term;
+
+                        // create vertex at current (x, y) and push to vertices
+                        let vertex: Vertex<T> = Vertex::new(vertex_id, x, y, T::one());
+                        self.vertices.push(vertex);
+
+                        // increment vertex id
+                        vertex_id += 1;
+                    }
+                    // step in x direction
+                    x = x + dx;
+                }
+            }
         }
     }
 }

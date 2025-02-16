@@ -11,17 +11,34 @@ pub enum WallDistribution {
     HyperbolicTangent, 
 }
 
+pub enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
 pub struct Mesh<T: Float + Display + Into<f64> + Copy> {
     pub vertices: Vec<Vertex<T>>,
-    pub lines: Vec<Line<T>>,
+    pub nodes: Vec<Node2D<T>>,
+    pub nx: i32,
+    pub ny: i32,
 }
 
 impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
     pub fn new() -> Mesh<T> {
         Mesh {
             vertices: Vec::new(),
-            lines: Vec::new(),
+            nodes: Vec::new(),
+            nx: 0,
+            ny: 0, 
         }
+    }
+
+    pub fn find_vertex(&self, id: i32) -> Option<&Vertex<T>> {
+        self.vertices
+            .iter()
+            .find(|&v| v.id == id)
     }
 
     pub fn get_vertices(&self) -> (Vec<T>, Vec<T>, Vec<T>) {
@@ -36,6 +53,24 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
         }
 
         (x, y, z)
+    }
+
+    pub fn get_adjacent_vertex(&self, id: i32, direction: Direction) -> Option<&Vertex<T>> {
+        // if returns Option::None then vertex lies on a boundary
+        match direction {
+            Direction::North => {
+                self.find_vertex(id + 1)
+            }
+            Direction::South => {
+                self.find_vertex(id - 1)
+            }
+            Direction::East => {
+                self.find_vertex(id + self.ny)
+            }
+            Direction::West => {
+                self.find_vertex(id - self.ny)
+            }
+        }
     }
 
     pub fn draw_mesh(&self) {

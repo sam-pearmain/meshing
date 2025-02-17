@@ -34,8 +34,8 @@ impl<T: Float> Point3D<T> {
     }
 }
 
-impl<T: Float + Display> Display for Point3D<T> {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+impl<T: Float + fmt::Display> fmt::Display for Point3D<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }

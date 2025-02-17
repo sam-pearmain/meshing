@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+
+use crate::utils::error::*;
 use super::prelude::*;
 use super::Point3D;
 
@@ -16,11 +19,46 @@ impl<T: Float> Vertex<T> {
     }
 }
 
-impl<T: Float + Display> Display for Vertex<T> {
+impl<T: Float + fmt::Display> fmt::Display for Vertex<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f, "vertex {} at ({}, {}, {})",
             self.id, self.coords.x, self.coords.y, self.coords.z
         )
+    }
+}
+
+pub enum Dimensions {
+    TwoDimensions, 
+    ThreeDimensions,
+}
+
+pub enum WriteOrder {
+    IJK, // loop in x, then y, then k
+    JIK, // loop in y, then x, then k
+}
+
+pub struct VertexCollection<T: Float> {
+    vertices: Vec<Vertex<T>>,
+    dimensions: Dimensions,
+    write_order: WriteOrder, 
+}
+
+impl<T: Float + fmt::Display> VertexCollection<T> {
+    pub fn new(dimensions: Dimensions, write_order: WriteOrder) -> Self {
+        VertexCollection {
+            vertices: Vec::new(),
+            dimensions,
+            write_order,
+        }
+    }
+
+    pub fn find_vertex(&self, id: i32) -> Result<&Vertex<T>, GeometryError> {
+        for vertex in &self.vertices {
+            if vertex.id == id {
+                return Ok(vertex);
+            }
+        }
+        Err(GeometryError::VertexNotFound { vertex_id: id })
     }
 }

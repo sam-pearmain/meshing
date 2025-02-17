@@ -7,6 +7,7 @@ use crate::geometry::Vertex;
 #[derive(Debug)]
 pub enum GeometryError {
     IncompleteNode{ node_id: i32 }, // should return information about the bad node not just an id
+    VertexNotFound{ vertex_id: i32},
 }
 
 #[derive(Debug)]
@@ -19,7 +20,10 @@ impl Display for GeometryError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
             GeometryError::IncompleteNode { node_id } => {
-                write!(f, "node {} is incomplete", node_id)
+                write!(f, "node: {} is incomplete", node_id)
+            }
+            GeometryError::VertexNotFound { vertex_id } => {
+                write!(f, "vertex: {} not found", vertex_id)
             }
         }
     }

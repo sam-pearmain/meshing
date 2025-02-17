@@ -98,7 +98,7 @@ impl Dimensions {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum WriteOrder {
     IJK, // loop in x, then y, then k
     JIK, // loop in y, then x, then k
@@ -241,9 +241,9 @@ mod tests {
         let dimensions = Dimensions::TwoDimensions { nx: 3, ny: 3 };
         let mut collection = VertexCollection::new(dimensions, WriteOrder::IJK);
         
-        // Create a 3x3 grid of vertices
+        // create a 3x3 grid of vertices
         for i in 1..=9 {
-            collection.add_vertex((i - 1) as f64 % 3.0, (i - 1) as f64 / 3.0, 1.0);
+            collection.add_vertex((i - 1) as f64 % 3.0, (i - 1) as f64 / 3.0, 1.0).expect("idk");
         }
         collection
     }
@@ -268,19 +268,19 @@ mod tests {
     fn test_is_boundary_vertex_2d_ijk() {
         let collection = create_2d_collection();
         
-        // Test corners
+        // test corners
         assert!(collection.is_boundary_vertex(1, Direction::South).unwrap()); // bottom-left
         assert!(collection.is_boundary_vertex(3, Direction::South).unwrap()); // bottom-right
         assert!(collection.is_boundary_vertex(7, Direction::North).unwrap()); // top-left
         assert!(collection.is_boundary_vertex(9, Direction::North).unwrap()); // top-right
 
-        // Test edges
+        // test edges
         assert!(collection.is_boundary_vertex(2, Direction::South).unwrap()); // bottom edge
         assert!(collection.is_boundary_vertex(4, Direction::West).unwrap());  // left edge
         assert!(collection.is_boundary_vertex(6, Direction::East).unwrap());  // right edge
         assert!(collection.is_boundary_vertex(8, Direction::North).unwrap()); // top edge
 
-        // Test center
+        // test center
         assert!(!collection.is_boundary_vertex(5, Direction::North).unwrap());
         assert!(!collection.is_boundary_vertex(5, Direction::South).unwrap());
         assert!(!collection.is_boundary_vertex(5, Direction::East).unwrap());
@@ -302,7 +302,7 @@ mod tests {
     fn test_boundary_errors() {
         let collection = create_2d_collection();
         
-        // Test boundary errors
+        // test boundary errors
         assert!(matches!(
             collection.find_adjacent_vertex(1, Direction::South),
             Err(GeometryError::BoundaryVertex { vertex_id: 1, direction: Direction::South })

@@ -1,7 +1,8 @@
+#![allow(dead_code)]
+
 use std::fmt::{Display, Result, Formatter};
 use num_traits::Float;
-
-use crate::old::Vertex;
+use crate::geometry::Vertex;
 
 #[derive(Debug)]
 pub enum GeometryError {

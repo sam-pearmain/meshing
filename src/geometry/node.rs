@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use super::prelude::*;
 use super::{Point3D, Line};
 

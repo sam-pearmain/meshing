@@ -5,6 +5,7 @@ use std::fmt::Display;
 use std::fs::File;
 use std::io::Write;
 use crate::utils::error::*;
+use crate::geometry::{Vertex, Node2D};
 
 pub enum WallDistribution {
     Uniform, 

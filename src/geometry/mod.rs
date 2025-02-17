@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 mod point;
 mod line;
 mod vertex;

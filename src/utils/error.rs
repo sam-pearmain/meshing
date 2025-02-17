@@ -1,11 +1,11 @@
 use std::fmt::{Display, Result, Formatter};
 use num_traits::Float;
 
-use crate::geometry::Vertex;
+use crate::old::Vertex;
 
 #[derive(Debug)]
 pub enum GeometryError {
-    IncompleteNode{ node_id: i32 } 
+    IncompleteNode{ node_id: i32 }, // should return information about the bad node not just an id
 }
 
 #[derive(Debug)]

@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::fmt::Display;
 use num_traits::Float;
 

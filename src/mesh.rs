@@ -4,7 +4,7 @@ use num_traits::Float;
 use std::fmt::Display;
 use std::fs::File;
 use std::io::Write;
-use crate::geometry::*;
+use crate::utils::error::*;
 
 pub enum WallDistribution {
     Uniform, 
@@ -214,9 +214,9 @@ impl<'a, T: Float + Display + Into<f64> + Copy> Mesh<'a, T> {
         // todo
     }
 
-    fn populate_nodes(&self) -> Result<(), std::io::Error> {
+    fn populate_nodes(&self) -> Result<(), MeshError<T>> {
         if self.is_empty() {
-            return Err(std::io::Error);
+            return Err(MeshError::EmptyMesh)
         }
 
         Ok(())

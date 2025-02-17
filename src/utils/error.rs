@@ -5,12 +5,14 @@ use num_traits::Float;
 use crate::geometry::{Direction, Vertex};
 
 #[derive(Debug)]
-pub enum GeometryError {
+pub enum GeometryError<T: Float + Display> {
     IncompleteNode{ node_id: u32 }, // should return information about the bad node not just an id
     VertexNotFound{ vertex_id: u32},
     InvalidDirection{ direction: Direction },
     BoundaryVertex{ vertex_id: u32, direction: Direction},
     InvalidVertexID,
+    VertexLimitExceeded{ limit: u32, attempted: u32 },
+    InvalidVertexCoordinate{ coordinate: char, expected: T, received: T }
 }
 
 #[derive(Debug)]
@@ -19,7 +21,7 @@ pub enum MeshError<T: Float> {
     DuplicateVertexIds{ v1: Vertex<T>, v2: Vertex<T> },
 }
 
-impl Display for GeometryError {
+impl<T: Float + Display> Display for GeometryError<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
             GeometryError::IncompleteNode { node_id } => {
@@ -36,6 +38,12 @@ impl Display for GeometryError {
             }
             GeometryError::InvalidVertexID => {
                 write!(f, "vertex must have non zero id")
+            }
+            GeometryError::VertexLimitExceeded { limit, attempted } => {
+                write!(f, "vertex limit exceeded {} of {}", attempted, limit)
+            }
+            GeometryError::InvalidVertexCoordinate { coordinate, expected, received } => {
+                write!(f, "{}-coordinate must be {} for a 2D mesh, received {}", coordinate, expected, received)
             }
         }
     }

@@ -20,7 +20,7 @@ pub enum Direction {
 }
 
 pub struct Mesh<'a, T: Float + Display + Into<f64> + Copy> {
-    pub vertices: Vec<Vertex<T>>,
+    pub vertices: Vec<Vertex<T>>, // maybe change this to its own Vertices struct so its methods are cleaner
     pub nodes: Vec<Node2D<'a, T>>,
     pub nx: i32,
     pub ny: i32,
@@ -214,7 +214,15 @@ impl<'a, T: Float + Display + Into<f64> + Copy> Mesh<'a, T> {
         // todo
     }
 
-    fn populate_nodes(&self) {
-        
+    fn populate_nodes(&self) -> Result<(), std::io::Error> {
+        if self.is_empty() {
+            return Err(std::io::Error);
+        }
+
+        Ok(())
+    }
+
+    fn is_empty(&self) -> bool {
+        self.vertices.is_empty()
     }
 }

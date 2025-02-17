@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 
+use std::fmt::Display;
 use num_traits::Float;
 
+#[derive(Debug)]
 pub struct Point3D<T: Float> {
     pub x: T,
     pub y: T,
@@ -18,6 +20,7 @@ impl<T: Float> Point3D<T> {
     }
 }
 
+#[derive(Debug)]
 pub struct Vertex<T: Float> {
     pub id: i32,
     pub coords: Point3D<T>,
@@ -29,6 +32,15 @@ impl<T: Float> Vertex<T> {
             id: id, 
             coords: Point3D::new(x, y, z),
         }
+    }
+}
+
+impl<T: Float + Display> Display for Vertex<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f, "vertex {} at ({}, {}, {})",
+            self.id, self.coords.x, self.coords.y, self.coords.z
+        )
     }
 }
 

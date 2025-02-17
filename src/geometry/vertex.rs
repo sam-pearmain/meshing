@@ -1,7 +1,5 @@
 #![allow(dead_code)]
 
-use std::fmt::Display;
-
 use crate::utils::error::*;
 use super::prelude::*;
 use super::Point3D;
@@ -43,7 +41,7 @@ pub enum Direction {
     Down,   // -z
 }
 
-impl Display for Direction {
+impl fmt::Display for Direction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Direction::North => write!(f, "north"),
@@ -125,6 +123,12 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
         self.vertices.is_empty()
     }
 
+    pub fn vertex_exists(&self, id: u32) -> bool {
+        self.vertices
+            .iter()
+            .any(|v| v.id == id)
+    }
+
     pub fn find_vertex(&self, id: u32) -> Result<&Vertex<T>, GeometryError> {
         self.vertices
             .iter()
@@ -141,71 +145,59 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
 
         match (direction, self.write_order) {
             // IJK order: x -> y -> z
-            (Direction::South, WriteOrder::IJK) => Ok(id <= nx),  // first nx vertices
+            (Direction::South, WriteOrder::IJK) => Ok(id <= nx),            // first nx vertices
             (Direction::North, WriteOrder::IJK) => Ok(id > nx * (ny - 1)),  // last nx vertices in plane
-            (Direction::West, WriteOrder::IJK) => Ok((id - 1) % nx == 0),  // first vertex in each row
-            (Direction::East, WriteOrder::IJK) => Ok(id % nx == 0),  // last vertex in each row
+            (Direction::West, WriteOrder::IJK) => Ok((id - 1) % nx == 0),   // first vertex in each row
+            (Direction::East, WriteOrder::IJK) => Ok(id % nx == 0),         // last vertex in each row
             
             // JIK order: y -> x -> z
-            (Direction::South, WriteOrder::JIK) => Ok(id % ny == 1),  // first vertex in each column
-            (Direction::North, WriteOrder::JIK) => Ok(id % ny == 0),  // last vertex in each column
-            (Direction::West, WriteOrder::JIK) => Ok(id <= ny),  // first ny vertices
-            (Direction::East, WriteOrder::JIK) => Ok(id > ny * (nx - 1)),  // last ny vertices in plane
+            (Direction::South, WriteOrder::JIK) => Ok(id % ny == 1),        // first vertex in each column
+            (Direction::North, WriteOrder::JIK) => Ok(id % ny == 0),        // last vertex in each column
+            (Direction::West, WriteOrder::JIK) => Ok(id <= ny),             // first ny vertices
+            (Direction::East, WriteOrder::JIK) => Ok(id > ny * (nx - 1)),   // last ny vertices in plane
             
             // 3D boundaries
-            (Direction::Up, _) => Ok(id > nx * ny * (nz - 1)),  // top layer
-            (Direction::Down, _) => Ok(id <= nx * ny),  // bottom layer
+            (Direction::Up, _) => Ok(id > nx * ny * (nz - 1)),              // top layer
+            (Direction::Down, _) => Ok(id <= nx * ny),                      // bottom layer
         }
     }
 
-    pub fn find_adjacent_vertex(&self, id: i32, direction: Direction) -> Result<&Vertex<T>, GeometryError> {
-        // check if the given vertex exists 
-        let current_vertex: &Vertex<T> = self.find_vertex(id)?;
+    pub fn find_adjacent_vertex(&self, id: u32, direction: Direction) -> Result<&Vertex<T>, GeometryError> {
+        // check if requested vertex exists
+        if !self.vertex_exists(id) {
+            return Err(GeometryError::VertexNotFound { vertex_id: id });
+        }
 
         // get dimensions based on mesh type 
         if self.dimensions.is_2d() && matches!(direction, Direction::Up | Direction::Down) {
             return Err(GeometryError::InvalidDirection { direction });
         }
-        let (nx, ny, nz) = self.dimensions.get_dimensions();
+        let (nx, ny, _) = self.dimensions.get_dimensions();
 
-        // calculate the adjacent vertex id based on given direction
-        let adjacent_id: i32 = match direction {
-            Direction::North => {
-                // check if we are at the northern boundary
-                if current_vertex.id % self.ny == self.ny - 1 {
-                    return None;
-                }
-                id + 1
-            }
-            Direction::South => {
-                // check if we are at the southern boundary
-                if current_vertex.id % self.ny == 0 {
-                    return None;
-                }
-                id - 1
-            }
-            Direction::East => {
-                // check if we are at the eastern boundary
-                if current_vertex.id >= (self.nx - 1) * self.ny {
-                    return None;
-                }
-                id + self.ny
-            }
-            Direction::West => {
-                // check if we are at the western boundary
-                if current_vertex.id < self.ny {
-                    return None;
-                }
-                id - self.ny
-            }
-            Direction::Up => {
-                // check if we are at the top boundary
-                if current_vertex.id
-            }
-            Direction::Down => {
+        // check if we are at a boundary in the requested direction
+        if self.is_boundary_vertex(id, direction)? {
+            return Err(GeometryError::BoundaryVertex { vertex_id: id, direction: direction });
+        }
 
-            }
+        // calculate the adjacent vertex's id
+        let adjacent_id: u32 = match (direction, self.write_order) {
+            // IJK order: x -> y -> z
+            (Direction::North, WriteOrder::IJK) => id + nx, // move up one row
+            (Direction::South, WriteOrder::IJK) => id - nx, // move down one row
+            (Direction::East, WriteOrder::IJK) => id + 1,   // move right
+            (Direction::West, WriteOrder::IJK) => id - 1,   // move left
+            
+            // JIK order: y -> x -> z
+            (Direction::North, WriteOrder::JIK) => id + 1,  // move up
+            (Direction::South, WriteOrder::JIK) => id - 1,  // move down
+            (Direction::East, WriteOrder::JIK) => id + ny,  // move right one column
+            (Direction::West, WriteOrder::JIK) => id - ny,  // move left one column
+            
+            // 3D movements (same for both orders)
+            (Direction::Up, _) => id + (nx * ny),           // move up one layer
+            (Direction::Down, _) => id - (nx * ny),         // move down one layer
         };
+
         Ok(self.find_vertex(adjacent_id)?)
     }
 }

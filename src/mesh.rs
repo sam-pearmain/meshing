@@ -211,6 +211,15 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
     }
 
     pub fn export_stl(&self, filename: &str) {
-        
+        // todo
+    }
+
+    fn populate_nodes(&self) -> Result<()> {
+        // loop through every vertex and construct a node about it
+        for vertex in self.vertices {
+
+        }
+
+        Ok(())
     }
 }

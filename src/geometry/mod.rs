@@ -10,3 +10,4 @@ pub use point::Point3D;
 pub use vertex::Vertex;
 pub use line::Line;
 pub use node::Node2D;
+pub use vertex::Direction;

@@ -2,12 +2,15 @@
 
 use std::fmt::{Display, Result, Formatter};
 use num_traits::Float;
-use crate::geometry::Vertex;
+use crate::geometry::{Direction, Vertex};
 
 #[derive(Debug)]
 pub enum GeometryError {
     IncompleteNode{ node_id: i32 }, // should return information about the bad node not just an id
     VertexNotFound{ vertex_id: i32},
+    InvalidDirection{ direction: Direction },
+    BoundaryVertex{ vertex_id: i32, direction: Direction},
+    InvalidVertexID,
 }
 
 #[derive(Debug)]
@@ -24,6 +27,15 @@ impl Display for GeometryError {
             }
             GeometryError::VertexNotFound { vertex_id } => {
                 write!(f, "vertex: {} not found", vertex_id)
+            }
+            GeometryError::InvalidDirection { direction } => {
+                write!(f, "{} not possible for 2D mesh", direction)
+            }
+            GeometryError::BoundaryVertex { vertex_id, direction } => {
+                write!(f, "vertex: {} is a boundary vertex, nothing exists {} of it", vertex_id, direction)
+            }
+            GeometryError::InvalidVertexID => {
+                write!(f, "vertex must have non zero id")
             }
         }
     }

@@ -100,6 +100,7 @@ impl Dimensions {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum WriteOrder {
     IJK, // loop in x, then y, then k
     JIK, // loop in y, then x, then k
@@ -132,39 +133,28 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
     }
 
     pub fn is_boundary_vertex(&self, id: u32, direction: Direction) -> Result<bool, GeometryError> {
-        let current_vertex: &Vertex<T> = self.find_vertex(id)?;
-        
         // get dimensions based on mesh type 
         if self.dimensions.is_2d() && matches!(direction, Direction::Up | Direction::Down) {
             return Err(GeometryError::InvalidDirection { direction });
         }
         let (nx, ny, nz) = self.dimensions.get_dimensions();
 
-        match direction {
-            Direction::North => {
-                match self.write_order {
-                    WriteOrder::IJK => 
-                    WriteOrder::JIK => 
-                }
-            }
-            Direction::South => {
-
-            }
-            Direction::East => {
-
-            }
-            Direction::West => {
-
-            }
-            Direction::West => {
-
-            }
-            Direction::Up => {
-
-            }
-            Direction::Down => {
-
-            }
+        match (direction, self.write_order) {
+            // IJK order: x -> y -> z
+            (Direction::South, WriteOrder::IJK) => Ok(id <= nx),  // first nx vertices
+            (Direction::North, WriteOrder::IJK) => Ok(id > nx * (ny - 1)),  // last nx vertices in plane
+            (Direction::West, WriteOrder::IJK) => Ok((id - 1) % nx == 0),  // first vertex in each row
+            (Direction::East, WriteOrder::IJK) => Ok(id % nx == 0),  // last vertex in each row
+            
+            // JIK order: y -> x -> z
+            (Direction::South, WriteOrder::JIK) => Ok(id % ny == 1),  // first vertex in each column
+            (Direction::North, WriteOrder::JIK) => Ok(id % ny == 0),  // last vertex in each column
+            (Direction::West, WriteOrder::JIK) => Ok(id <= ny),  // first ny vertices
+            (Direction::East, WriteOrder::JIK) => Ok(id > ny * (nx - 1)),  // last ny vertices in plane
+            
+            // 3D boundaries
+            (Direction::Up, _) => Ok(id > nx * ny * (nz - 1)),  // top layer
+            (Direction::Down, _) => Ok(id <= nx * ny),  // bottom layer
         }
     }
 

@@ -19,15 +19,15 @@ pub enum Direction {
     West,
 }
 
-pub struct Mesh<T: Float + Display + Into<f64> + Copy> {
+pub struct Mesh<'a, T: Float + Display + Into<f64> + Copy> {
     pub vertices: Vec<Vertex<T>>,
-    pub nodes: Vec<Node2D<T>>,
+    pub nodes: Vec<Node2D<'a, T>>,
     pub nx: i32,
     pub ny: i32,
 }
 
-impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
-    pub fn new() -> Mesh<T> {
+impl<'a, T: Float + Display + Into<f64> + Copy> Mesh<'a, T> {
+    pub fn new() -> Mesh<'a, T> {
         Mesh {
             vertices: Vec::new(),
             nodes: Vec::new(),
@@ -214,12 +214,7 @@ impl<T: Float + Display + Into<f64> + Copy> Mesh<T> {
         // todo
     }
 
-    fn populate_nodes(&self) -> Result<()> {
-        // loop through every vertex and construct a node about it
-        for vertex in self.vertices {
-
-        }
-
-        Ok(())
+    fn populate_nodes(&self) {
+        
     }
 }

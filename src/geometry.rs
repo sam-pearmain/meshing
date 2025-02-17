@@ -128,14 +128,14 @@ mod tests {
         let south = Line::new(&v1, &v2);  // bottom edge
         let west = Line::new(&v4, &v1);   // left edge
 
-        let node: Node2D<f64> = Node2D {
-            id: 1,
-            north_face: north, 
-            east_face: east, 
-            south_face: south, 
-            west_face: west, 
-        };
-        
+        let node: Node2D<f64> = Node2D::new(
+            1,
+            north, 
+            east, 
+            south, 
+            west,
+        );
+
         let centre: Point3D<f64> = node.find_centre();
         assert_eq!(centre.x, 0.5);
         assert_eq!(centre.y, 0.5);

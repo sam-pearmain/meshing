@@ -1,7 +1,7 @@
-use std::{fmt, i32};
+use std::fmt::{Display, Result, Formatter};
 use num_traits::Float;
 
-use crate::geometry::{Node2D, Vertex};
+use crate::geometry::Vertex;
 
 #[derive(Debug)]
 pub enum GeometryError {
@@ -14,18 +14,18 @@ pub enum MeshError<T: Float> {
     DuplicateVertexIds{ v1: Vertex<T>, v2: Vertex<T> },
 }
 
-impl fmt::Display for GeometryError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Display for GeometryError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
-            GeometryError::IncompleteNode { node_id: i32 } => {
+            GeometryError::IncompleteNode { node_id } => {
                 write!(f, "node {} is incomplete", node_id)
             }
         }
     }
 }
 
-impl<T: Float + fmt::Display> fmt::Display for MeshError<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl<T: Float + Display> Display for MeshError<T> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
             MeshError::EmptyMesh => {
                 write!(f, "mesh is empty")

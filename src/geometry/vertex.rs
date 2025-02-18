@@ -13,14 +13,15 @@ pub struct Vertex<T: Float> {
 }
 
 impl<T: Float + fmt::Display> Vertex<T> {
-    pub fn new(id: usize, x: T, y: T, z: T) -> Result<Vertex<T>, GeometryError<T>> {
-        if id == 0 {
-            return Err(GeometryError::InvalidVertexID);    
-        }
-        Ok(Vertex {
+    pub fn new(id: usize, x: T, y: T, z: T) -> Vertex<T> {
+        Vertex {
             id: id, 
             coords: Point3D::new(x, y, z),
-        })
+        }
+    }
+
+    pub fn is_2d(&self) -> bool {
+        self.coords.z != T::one()
     }
 }
 

@@ -1,69 +1,86 @@
 #![allow(dead_code)]
 
-use super::prelude::*;
+use super::{prelude::*, Dimensioned, Point};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
+pub struct Point2D<T: Float> {
+    x: T,
+    y: T
+}
+
+impl<T: Float> Dimensioned for Point2D<T> {
+    fn is_2d(&self) -> bool {
+        true
+    }
+}
+
+impl<T: Float> Point<T> for Point2D<T> {
+    type Tuple = (T, T);
+    
+    fn origin() -> Self {
+        Point2D {
+            x: T::zero(),
+            y: T::zero(),
+        }
+    }
+
+    fn distance_to(&self, other: &Self) -> T {
+        (
+            (self.x - other.x).powi(2) + 
+            (self.y - other.y).powi(2)
+        ).sqrt()
+    }
+
+    fn as_tuple(&self) -> Self::Tuple {
+        (self.x, self.y)
+    }
+}
+
+impl<T: Float + fmt::Display> fmt::Display for Point2D<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Point2D ({}, {})", self.x, self.y)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Point3D<T: Float> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-impl<T: Float> Point3D<T> {
-    pub fn new(x: T, y: T, z: T) -> Self {
-        Point3D { x, y, z }
+impl<T: Float> Dimensioned for Point3D<T> {
+    fn is_2d(&self) -> bool {
+        false
     }
+}
 
-    pub fn origin() -> Self {
+impl<T: Float> Point<T> for Point3D<T> {
+    type Tuple = (T, T, T);
+    
+    fn origin() -> Self {
         Point3D {
-            x: T::zero(), 
+            x: T::zero(),
             y: T::zero(),
             z: T::zero(),
         }
     }
 
-    pub fn distance_to(&self, other: &Point3D<T>) -> T {
-        let dx = self.x - other.x;
-        let dy = self.y - other.y;
-        let dz = self.z - other.z;
-        (dx.powi(2) + dy.powi(2) + dz.powi(2)).sqrt()
+    fn distance_to(&self, other: &Self) -> T {
+        (
+            (self.x - other.x).powi(2) + 
+            (self.y - other.y).powi(2) + 
+            (self.z - other.z).powi(2)
+        ).sqrt()
     }
 
-    pub fn as_tuple(&self) -> (T, T, T) {
+    fn as_tuple(&self) -> Self::Tuple {
         (self.x, self.y, self.z)
     }
 }
 
 impl<T: Float + fmt::Display> fmt::Display for Point3D<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "({}, {}, {})", self.x, self.y, self.z)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_point_creation() {
-        let p = Point3D::new(1.0, 2.0, 3.0);
-        assert_eq!(p.x, 1.0);
-        assert_eq!(p.y, 2.0);
-        assert_eq!(p.z, 3.0);
-    }
-
-    #[test]
-    fn test_origin() {
-        let p = Point3D::<f64>::origin();
-        assert_eq!(p.x, 0.0);
-        assert_eq!(p.y, 0.0);
-        assert_eq!(p.z, 0.0);
-    }
-
-    #[test]
-    fn test_distance() {
-        let p1 = Point3D::new(0.0, 0.0, 0.0);
-        let p2 = Point3D::new(3.0, 4.0, 0.0);
-        assert_eq!(p1.distance_to(&p2), 5.0);
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Point3D({}, {}, {})", self.x, self.y, self.z)
     }
 }

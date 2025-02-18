@@ -1,25 +1,39 @@
-#![allow(dead_code)]
+// #![allow(dead_code)]
 
-use super::prelude::*;
-use super::Vertex;
+// use super::prelude::Float;
+// use super::Dimensioned;
+// use super::Point;
+// use super::vertices::Vertex;
 
-pub struct Line<'a, T: Float> {
-    pub start: &'a Vertex<T>,
-    pub end: &'a Vertex<T>,
-}
+// pub struct Line<'a, F: Float, P: Point<F>> {
+//     pub start: &'a Vertex<F, P>,
+//     pub end: &'a Vertex<F, P>,
+// }
 
-impl<'a, T: Float> Line<'a, T> {
-    pub fn new(v1: &'a Vertex<T>, v2: &'a Vertex<T>) -> Line<'a, T> {
-        Line {
-            start: v1,
-            end: v2,
-        }
-    }
+// impl<'a, F: Float, P: Point<F>> Dimensioned for Line<'a, F, P> {
+//     fn is_2d(&self) -> bool {
+//         self.start.is_2d() && self.end.is_2d()
+//     }
+// }
 
-    pub fn length(&self) -> T {
-        let x_diff: T = self.end.coords.x - self.start.coords.x;
-        let y_diff: T = self.end.coords.y - self.start.coords.y;
-        let z_diff: T = self.end.coords.z - self.start.coords.z;
-        (x_diff.powi(2) + y_diff.powi(2) + z_diff.powi(2)).sqrt()
-    }
-}
+// impl<'a, F: Float, P: Point<F>> Line<'a, F, P> {
+//     pub fn between_vertices(v1: &'a Vertex<F, P>, v2: &'a Vertex<F, P>) -> Self {
+//         Line {
+//             start: v1,
+//             end: v2,
+//         }
+//     }
+
+//     pub fn length(&self) -> F {
+//         if self.is_2d() {
+//             let dx = self.end.x - self.start.x;
+//             let dy = self.end.y - self.start.y;
+//             (dx.powi(2) + dy.powi(2)).sqrt()
+//         } else {
+//             let dx = self.end.x - self.start.x;
+//             let dy = self.end.y - self.start.y;
+//             let dz = self.end.z - self.start.z;
+//             (dx.powi(2) + dy.powi(2) + dz.powi(2)).sqrt()
+//         }
+//     }
+// }

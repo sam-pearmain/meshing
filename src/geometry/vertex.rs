@@ -54,12 +54,17 @@ impl fmt::Display for Direction {
     }
 }
 
+#[derive(Debug)]
 pub enum Dimensions {
     TwoDimensions{ nx: u32, ny: u32 }, 
     ThreeDimensions{ nx: u32, ny: u32, nz: u32 },
 }
 
 impl Dimensions {
+    pub fn is_2d(&self) -> bool {
+        matches!(self, Dimensions::TwoDimensions { .. })
+    }
+
     pub fn get_nx(&self) -> u32 {
         match self {
             Dimensions::TwoDimensions { nx, .. } => *nx,
@@ -88,13 +93,28 @@ impl Dimensions {
         }
     }
 
-    pub fn is_2d(&self) -> bool {
-        matches!(self, Dimensions::TwoDimensions { .. })
+    pub fn set_nx(&mut self, new_nx: u32) {
+        match self {
+            Dimensions::TwoDimensions { nx, .. } => *nx = new_nx,
+            Dimensions::ThreeDimensions { nx, .. } => *nx = new_nx,
+        }
     }
 
-    pub fn total_vertices(&self) -> u32 {
-        let (nx, ny, nz) = self.get_dimensions();
-        nx * ny * nz
+    pub fn set_ny(&mut self, new_ny: u32) {
+        match self {
+            Dimensions::TwoDimensions { ny, .. } => *ny = new_ny,
+            Dimensions::ThreeDimensions { ny, .. } => *ny = new_ny,
+        }
+    }
+
+    pub fn set_nz(&mut self, new_nz: u32) -> Result<(), &'static str>{
+        match self {
+            Dimensions::TwoDimensions { .. } => Err("cannot set nz for 2D dimensions"),
+            Dimensions::ThreeDimensions { nz, .. } => {
+                *nz = new_nz;
+                Ok(())
+            }
+        }
     }
 }
 

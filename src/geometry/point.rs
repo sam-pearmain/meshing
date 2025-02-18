@@ -1,15 +1,13 @@
-#![allow(dead_code)]
-
 use super::{prelude::*, Dimensioned, Point};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Point2D<T: Float> {
     x: T,
-    y: T
+    y: T,
 }
 
 impl<T: Float> Point2D<T> {
-    fn new(x: T, y: T) -> Self {
+    pub fn new(x: T, y: T) -> Self {
         Point2D { x, y }
     }
 }
@@ -56,7 +54,7 @@ pub struct Point3D<T: Float> {
 }
 
 impl<T: Float> Point3D<T> {
-    fn new(x: T, y: T, z: T) -> Self {
+    pub fn new(x: T, y: T, z: T) -> Self {
         Point3D { x, y, z }
     }
 }

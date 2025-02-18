@@ -3,6 +3,7 @@
 mod traits;
 mod point;
 mod line;
+mod vertices;
 mod vertex;
 mod node;
 mod prelude;

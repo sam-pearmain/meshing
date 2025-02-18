@@ -11,6 +11,10 @@ impl<F: Float, P: Point<F>> Vertex<F, P> {
     pub fn is_2d(&self) -> bool {
         self.coords.is_2d()
     }
+
+    pub fn get_x(&self) -> F {
+        self.coords.get_x()
+    }
 }
 
 impl<F: Float> Vertex<F, Point2D<F>> {

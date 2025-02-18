@@ -38,6 +38,18 @@ impl<T: Float> Point<T> for Point2D<T> {
     fn as_tuple(&self) -> Self::Tuple {
         (self.x, self.y)
     }
+
+    fn get_x(&self) -> T {
+        self.x
+    }
+
+    fn get_y(&self) -> T {
+        self.y
+    }
+
+    fn get_z(&self) -> Option<T> {
+        None
+    }
 }
 
 impl<T: Float + fmt::Display> fmt::Display for Point2D<T> {
@@ -86,6 +98,18 @@ impl<T: Float> Point<T> for Point3D<T> {
 
     fn as_tuple(&self) -> Self::Tuple {
         (self.x, self.y, self.z)
+    }
+
+    fn get_x(&self) -> T {
+        self.x
+    }
+
+    fn get_y(&self) -> T {
+        self.y
+    }
+
+    fn get_z(&self) -> Option<T> {
+        Some(self.z)
     }
 }
 

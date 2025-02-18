@@ -5,6 +5,7 @@ mod mesh;
 mod utils;
 
 fn main() {
+    println!("size of usize: {} bytes", std::mem::size_of::<usize>());
     // let mut mesh = mesh::Mesh::new();
 
     // mesh.create_mesh_2d(

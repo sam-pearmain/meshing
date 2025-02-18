@@ -8,12 +8,12 @@ use super::Point3D;
 
 #[derive(Debug)]
 pub struct Vertex<T: Float> {
-    pub id: u32,
+    pub id: usize,
     pub coords: Point3D<T>,
 }
 
 impl<T: Float + fmt::Display> Vertex<T> {
-    pub fn new(id: u32, x: T, y: T, z: T) -> Result<Vertex<T>, GeometryError<T>> {
+    pub fn new(id: usize, x: T, y: T, z: T) -> Result<Vertex<T>, GeometryError<T>> {
         if id == 0 {
             return Err(GeometryError::InvalidVertexID);    
         }
@@ -58,8 +58,8 @@ impl fmt::Display for Direction {
 
 #[derive(Debug)]
 pub enum Dimensions {
-    TwoDimensions{ nx: u32, ny: u32 }, 
-    ThreeDimensions{ nx: u32, ny: u32, nz: u32 },
+    TwoDimensions{ nx: usize, ny: usize }, 
+    ThreeDimensions{ nx: usize, ny: usize, nz: usize },
 }
 
 impl Dimensions {
@@ -67,49 +67,49 @@ impl Dimensions {
         matches!(self, Dimensions::TwoDimensions { .. })
     }
 
-    pub fn get_nx(&self) -> u32 {
+    pub fn get_nx(&self) -> usize {
         match self {
             Dimensions::TwoDimensions { nx, .. } => *nx,
             Dimensions::ThreeDimensions { nx, .. } => *nx,
         }
     }
 
-    pub fn get_ny(&self) -> u32 {
+    pub fn get_ny(&self) -> usize {
         match self {
             Dimensions::TwoDimensions { ny, .. } => *ny,
             Dimensions::ThreeDimensions { ny, .. } => *ny,
         }
     }
 
-    pub fn get_nz(&self) -> u32 {
+    pub fn get_nz(&self) -> usize {
         match self {
             Dimensions::TwoDimensions { .. } => 1,
             Dimensions::ThreeDimensions { nz, .. } => *nz,
         }
     }
 
-    pub fn get_dimensions(&self) -> (u32, u32, u32) {
+    pub fn get_dimensions(&self) -> (usize, usize, usize) {
         match self {
             Dimensions::TwoDimensions { nx, ny } => (*nx, *ny, 1),
             Dimensions::ThreeDimensions { nx, ny, nz } => (*nx, *ny, *nz),
         }
     }
 
-    pub fn set_nx(&mut self, new_nx: u32) {
+    pub fn set_nx(&mut self, new_nx: usize) {
         match self {
             Dimensions::TwoDimensions { nx, .. } => *nx = new_nx,
             Dimensions::ThreeDimensions { nx, .. } => *nx = new_nx,
         }
     }
 
-    pub fn set_ny(&mut self, new_ny: u32) {
+    pub fn set_ny(&mut self, new_ny: usize) {
         match self {
             Dimensions::TwoDimensions { ny, .. } => *ny = new_ny,
             Dimensions::ThreeDimensions { ny, .. } => *ny = new_ny,
         }
     }
 
-    pub fn set_nz(&mut self, new_nz: u32) -> Result<(), &'static str>{
+    pub fn set_nz(&mut self, new_nz: usize) -> Result<(), &'static str>{
         match self {
             Dimensions::TwoDimensions { .. } => Err("cannot set nz for 2D dimensions"),
             Dimensions::ThreeDimensions { nz, .. } => {
@@ -145,12 +145,8 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
         self.vertices.is_empty()
     }
 
-    pub fn total_vertices(&self) -> Result<u32, MeshError<T>> {
-        if self.is_empty() {
-            return Err(MeshError::EmptyMesh);
-        }
-        let (nx, ny, nz) = self.dimensions.get_dimensions();
-        Ok(nx * ny * nz)
+    pub fn total_vertices(&self) -> usize {
+        self.vertices.len() 
     }
 
     pub fn get_final_vertex(&self) -> Result<&Vertex<T>, MeshError<T>> {
@@ -161,7 +157,11 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
 
     pub fn add_vertex(&mut self, x: T, y: T, z: T) -> Result<(), GeometryError<T>> {
         if self.dimensions.is_2d() && z != T::one() {
-            return Err(GeometryError::InvalidVertexCoordinate { coordinate: 'z', expected: T::one(), received: z })
+            return Err(GeometryError::InvalidVertexCoordinate { 
+                coordinate: 'z', 
+                expected: T::one(), 
+                received: z, 
+            });
         }
         
         let next_id = if self.is_empty() {
@@ -172,34 +172,25 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
                 .id + 1
         };
 
-        let total_vertices = self.total_vertices()
-            .map_err(|_| GeometryError::InvalidVertexID)?;
-        if next_id > total_vertices {
-            return Err(GeometryError::VertexLimitExceeded{ 
-                limit: total_vertices,
-                attempted: next_id,
-            });
-        }
-
         let vertex = Vertex::new(next_id, x, y, z)?;
         self.vertices.push(vertex);
         Ok(())
     }
 
-    pub fn vertex_exists(&self, id: u32) -> bool {
+    pub fn vertex_exists(&self, id: usize) -> bool {
         self.vertices
             .iter()
             .any(|v| v.id == id)
     }
 
-    pub fn find_vertex(&self, id: u32) -> Result<&Vertex<T>, GeometryError<T>> {
+    pub fn find_vertex(&self, id: usize) -> Result<&Vertex<T>, GeometryError<T>> {
         self.vertices
             .iter()
             .find(|v| v.id == id)
             .ok_or(GeometryError::VertexNotFound { vertex_id: id })
     }
 
-    pub fn is_boundary_vertex(&self, id: u32, direction: Direction) -> Result<bool, GeometryError<T>> {
+    pub fn is_boundary_vertex(&self, id: usize, direction: Direction) -> Result<bool, GeometryError<T>> {
         // get dimensions based on mesh type 
         if self.dimensions.is_2d() && matches!(direction, Direction::Up | Direction::Down) {
             return Err(GeometryError::InvalidDirection { direction });
@@ -225,7 +216,7 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
         }
     }
 
-    pub fn find_adjacent_vertex(&self, id: u32, direction: Direction) -> Result<&Vertex<T>, GeometryError<T>> {
+    pub fn find_adjacent_vertex(&self, id: usize, direction: Direction) -> Result<&Vertex<T>, GeometryError<T>> {
         // check if requested vertex exists
         if !self.vertex_exists(id) {
             return Err(GeometryError::VertexNotFound { vertex_id: id });
@@ -243,7 +234,7 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
         }
 
         // calculate the adjacent vertex's id
-        let adjacent_id: u32 = match (direction, self.write_order) {
+        let adjacent_id: usize = match (direction, self.write_order) {
             // IJK order: x -> y -> z
             (Direction::North, WriteOrder::IJK) => id + nx, // move up one row
             (Direction::South, WriteOrder::IJK) => id - nx, // move down one row
@@ -274,8 +265,14 @@ mod tests {
         let mut collection = VertexCollection::new(dimensions, WriteOrder::IJK);
         
         // create a 3x3 grid of vertices
-        for i in 1..=9 {
-            collection.add_vertex((i - 1) as f64 % 3.0, (i - 1) as f64 / 3.0, 1.0).expect("idk");
+        for i in 0..3 {
+            for j in 0..3 {
+                collection.add_vertex(
+                    i as f64,
+                    j as f64,
+                    1.0 
+                ).expect("failed to add vertex to collection")
+            }
         }
         collection
     }

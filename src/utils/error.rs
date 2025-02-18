@@ -6,12 +6,12 @@ use crate::geometry::{Direction, Vertex};
 
 #[derive(Debug)]
 pub enum GeometryError<T: Float + Display> {
-    IncompleteNode{ node_id: u32 }, // should return information about the bad node not just an id
-    VertexNotFound{ vertex_id: u32},
+    IncompleteNode{ node_id: usize }, // should return information about the bad node not just an id
+    VertexNotFound{ vertex_id: usize},
     InvalidDirection{ direction: Direction },
-    BoundaryVertex{ vertex_id: u32, direction: Direction},
+    BoundaryVertex{ vertex_id: usize, direction: Direction},
     InvalidVertexID,
-    VertexLimitExceeded{ limit: u32, attempted: u32 },
+    VertexLimitExceeded{ limit: usize, attempted: usize },
     InvalidVertexCoordinate{ coordinate: char, expected: T, received: T }
 }
 

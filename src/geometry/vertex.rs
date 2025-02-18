@@ -7,9 +7,9 @@ use super::Point3D;
 // TODO: need to have more standardised errors and error cascading between functions
 
 #[derive(Debug)]
-pub struct Vertex<T: Float> {
+pub struct Vertex<F: Float, P: Point<T>> {
     pub id: usize,
-    pub coords: Point3D<T>,
+    pub coords: P,
 }
 
 impl<T: Float + fmt::Display> Vertex<T> {
@@ -21,6 +21,7 @@ impl<T: Float + fmt::Display> Vertex<T> {
     }
 
     pub fn is_2d(&self) -> bool {
+        // checks whether the z coordinate is not equal to 1, this is not a sound solution
         self.coords.z != T::one()
     }
 }

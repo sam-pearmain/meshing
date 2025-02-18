@@ -8,6 +8,12 @@ pub struct Point2D<T: Float> {
     y: T
 }
 
+impl<T: Float> Point2D<T> {
+    fn new(x: T, y: T) -> Self {
+        Point2D { x, y }
+    }
+}
+
 impl<T: Float> Dimensioned for Point2D<T> {
     fn is_2d(&self) -> bool {
         true
@@ -16,7 +22,7 @@ impl<T: Float> Dimensioned for Point2D<T> {
 
 impl<T: Float> Point<T> for Point2D<T> {
     type Tuple = (T, T);
-    
+
     fn origin() -> Self {
         Point2D {
             x: T::zero(),
@@ -47,6 +53,12 @@ pub struct Point3D<T: Float> {
     pub x: T,
     pub y: T,
     pub z: T,
+}
+
+impl<T: Float> Point3D<T> {
+    fn new(x: T, y: T, z: T) -> Self {
+        Point3D { x, y, z }
+    }
 }
 
 impl<T: Float> Dimensioned for Point3D<T> {

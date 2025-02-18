@@ -11,3 +11,9 @@ pub trait Point<T: Float>: Dimensioned {
     fn distance_to(&self, other: &Self) -> T;
     fn as_tuple(&self) -> Self::Tuple;
 }
+
+pub trait Vertex<T: Float>: Point<T> {
+    fn new<P: Point<T>>(id: usize, p: P) -> Self;
+    fn id(&self) -> usize;
+    fn set_id(&self, id: usize) -> ();
+}

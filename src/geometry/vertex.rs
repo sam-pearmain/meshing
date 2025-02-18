@@ -4,6 +4,8 @@ use crate::utils::error::*;
 use super::prelude::*;
 use super::Point3D;
 
+// TODO: need to have more standardised errors and error cascading between functions
+
 #[derive(Debug)]
 pub struct Vertex<T: Float> {
     pub id: u32,
@@ -143,6 +145,14 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
         self.vertices.is_empty()
     }
 
+    pub fn total_vertices(&self) -> Result<u32, MeshError<T>> {
+        if self.is_empty() {
+            return Err(MeshError::EmptyMesh);
+        }
+        let (nx, ny, nz) = self.dimensions.get_dimensions();
+        Ok(nx * ny * nz)
+    }
+
     pub fn get_final_vertex(&self) -> Result<&Vertex<T>, MeshError<T>> {
         self.vertices
             .last()
@@ -162,9 +172,11 @@ impl<T: Float + fmt::Display> VertexCollection<T> {
                 .id + 1
         };
 
-        if next_id > self.dimensions.total_vertices() {
+        let total_vertices = self.total_vertices()
+            .map_err(|_| GeometryError::InvalidVertexID)?;
+        if next_id > total_vertices {
             return Err(GeometryError::VertexLimitExceeded{ 
-                limit: self.dimensions.total_vertices(),
+                limit: total_vertices,
                 attempted: next_id,
             });
         }

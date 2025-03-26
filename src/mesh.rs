@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct GridPoint2D {
     i: usize, 
     j: usize, 
@@ -36,6 +36,29 @@ impl Grid2D {
 
     pub fn num_pts(&self) -> usize {
         self.points.len()
+    }
+
+    pub fn extents(&self) -> (f64, f64, f64, f64) {
+        let mut min_x: f64 = 0.0;
+        let mut max_x: f64 = 0.0;
+        let mut min_y: f64 = 0.0;
+        let mut max_y: f64 = 0.0;
+
+        for point in self.points {
+            if point.x < min_x {
+                min_x = point.x;
+            } else if point.x > max_x {
+                max_x = point.x;
+            }
+
+            if point.y < min_y {
+                min_y = point.y;
+            } else if point.y > max_y {
+                max_y = point.y;
+            }
+        }
+
+        (min_x, max_x, min_y, max_y)
     }
 
     fn get_next_ij(&self) -> Option<(usize, usize)> {

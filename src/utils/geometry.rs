@@ -99,7 +99,7 @@ impl Polynomial {
             .map(|k| {
                 let theta = 2.0 * std::f64::consts::PI * k as f64 / n_usize as f64;
                 // initial guess; adjust the radius as needed
-                Complex::from_polar(&1.0, &theta)
+                Complex::from_polar(1.0, theta)
             })
             .collect();
 
@@ -138,6 +138,16 @@ impl Polynomial {
         }
 
         roots
+    }
+
+    pub fn real_roots(&self) -> Vec<f64> {
+        // tolerance for considering a complex root to be real
+        let tol = 1e-8;
+        self.roots()
+            .into_iter()
+            .filter(|r| r.im.abs() < tol)
+            .map(|r| r.re)
+            .collect()
     }
 }
 
@@ -214,6 +224,65 @@ pub struct BSpline {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_complex::Complex;
+
+    const TOL: f64 = 1e-6;
+
+    fn poly_near_zero(poly: &Polynomial, root: Complex<f64>) -> bool {
+        let f_val = (poly.eqn())(root.re);
+        f_val.abs() < TOL
+    }
+
+    #[test]
+    fn test_quadratic_roots() {
+        // polynomial: x^2 - 5x + 6 = (x - 2)(x - 3)
+        let poly = Polynomial::new(vec![1.0, -5.0, 6.0]);
+        let roots = poly.roots();
+        assert_eq!(roots.len(), 2);
+        let expected_roots = vec![
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+        ];
+        for exp in expected_roots {
+            let found = roots.iter().any(|r| (r - exp).norm() < TOL);
+            assert!(found, "expected root {} not found", exp);
+        }
+    }
+
+    #[test]
+    fn test_cubic_roots() {
+        // polynomial: x^3 - 6x^2 + 11x - 6 = (x - 1)(x - 2)(x - 3)
+        let poly = Polynomial::new(vec![1.0, -6.0, 11.0, -6.0]);
+        let roots = poly.roots();
+        assert_eq!(roots.len(), 3);
+        let expected_roots = vec![
+            Complex::new(1.0, 0.0),
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+        ];
+        for exp in expected_roots {
+            let found = roots.iter().any(|r| (r - exp).norm() < TOL);
+            assert!(found, "expected root {} not found", exp);
+        }
+    }
+
+    #[test]
+    fn test_fourth_order_roots() {
+        // polynomial: x^4 - 10x^3 + 35x^2 - 50x + 24 = (x - 1)(x - 2)(x - 3)(x - 4)
+        let poly = Polynomial::new(vec![1.0, -10.0, 35.0, -50.0, 24.0]);
+        let roots = poly.roots();
+        assert_eq!(roots.len(), 4);
+        let expected_roots = vec![
+            Complex::new(1.0, 0.0),
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+            Complex::new(4.0, 0.0),
+        ];
+        for exp in expected_roots {
+            let found = roots.iter().any(|r| (r - exp).norm() < TOL);
+            assert!(found, "expected root {} not found", exp);
+        }
+    }
 
     #[test]
     fn print_straight_line() {

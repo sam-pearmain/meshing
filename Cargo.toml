@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 num-complex = "0.4.6"
-plotters = "0.3.7"
+pyo3 = "0.24.0"

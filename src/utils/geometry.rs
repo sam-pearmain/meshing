@@ -308,6 +308,7 @@ mod tests {
         ]);
         let real_roots = poly.real_roots();
         println!("{:?}", real_roots);
+        poly.plot("poly.png").expect("erm");
     }
 
     #[test]

@@ -1,34 +1,33 @@
-use plotters::prelude::*;
+use pyo3::prelude::*;
+use py03::types::PyList;
 
-pub fn plot_injective_function<F>(
+pub fn plot_injective_function<F: Fn(f64) -> f64>(
     f: F,
     x_range: (f64, f64),
-    y_range: (f64, f64),
-    file_name: &str,
-) -> Result<(), Box<dyn std::error::Error>>
-where
-    F: Fn(f64) -> f64,
-{
-    // create drawing area with a fixed size
-    let root = BitMapBackend::new(file_name, (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
-    let mut chart = ChartBuilder::on(&root)
-        .margin(10)
-        .caption("function plot", ("sans-serif", 40).into_font())
-        .x_label_area_size(30)
-        .y_label_area_size(30)
-        .build_cartesian_2d(x_range.0..x_range.1, y_range.0..y_range.1)?;
-    chart.configure_mesh().draw()?;
-    // generate 1000 sample points from x_range.0 to x_range.1
-    chart.draw_series(LineSeries::new(
-        (0..=1000).map(|i| {
-            let x = x_range.0 + (x_range.1 - x_range.0) * i as f64 / 1000.0;
-            (x, f(x))
-        }),
-        &RED,
-    ))?;
-    // ensure the drawing area is saved to file
-    root.present()?;
-    println!("result saved to {}", file_name);
+) -> Result<(), Box<dyn std::error::Error>> {
+    Python::with_gil(|py| -> PyResult<()> {
+        let plt = py.import("matplotlib.pyplot")?;
+        
+        let num_points = 100;
+        let (start, end) = x_range;
+        let mut x_values = Vec::with_capacity(num_points);
+        for i in 0..num_points {
+            let x = start + (end - start) * (i as f64) / ((num_points - 1) as f64);
+            x_values.push(x);
+        }
+        let y_values: Vec<f64> = x_values.iter().map(|&x| f(x)).collect();
+
+        let py_x = PyList::new(py, &x_values);
+        let py_y = PyList::new(py, &y_values);
+
+        plt.call_method("plot", (py_x, py_y), None)?;
+        plt.call_method("title", ("Injective Function Plot",), None)?;
+        plt.call_method("xlabel", ("x",), None)?;
+        plt.call_method("ylabel", ("f(x)",), None)?;
+        plt.call_method("grid", (), None)?;
+        plt.call_method("savefig", (file_name,), None)?;
+        Ok(())
+    })?;
+    
     Ok(())
 }

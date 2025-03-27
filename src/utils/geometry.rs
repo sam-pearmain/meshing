@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use num_complex::Complex;
+use crate::utils::plotting::plot_injective_function;
 
 pub struct Cartesian2D {
     x: f64,
@@ -10,6 +11,12 @@ pub struct Cartesian2D {
 pub trait Line2D {
     fn eqn(&self) -> impl Fn(f64) -> f64;
     fn solve(&self, x: f64) -> f64;
+    fn plot(&self, file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+        self.plot_bounded((-10.0, 10.0), (-10.0, 10.0), file_name)
+    }
+    fn plot_bounded(&self, x_range: (f64, f64), y_range: (f64, f64), file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+        plot_injective_function(self.eqn(), x_range, y_range, file_name)
+    }
 }
 
 // straight line stuff //
@@ -73,9 +80,7 @@ impl Polynomial {
     pub fn order(&self) -> usize {
         self.coefs.len() - 1
     }
-}
 
-impl Polynomial {
     pub fn roots(&self) -> Vec<Complex<f64>> {
         // if order is 0, there's no root to compute
         let n: usize = self.order();
@@ -302,7 +307,7 @@ mod tests {
             1.0,    // constant term (x^0)
         ]);
         let real_roots = poly.real_roots();
-        println!("real roots for 10th order polynomial: {:?}", real_roots);
+        println!("{:?}", real_roots);
     }
 
     #[test]

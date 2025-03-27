@@ -1,3 +1,7 @@
+mod grid;
+mod generator;
+mod utils;
+
 fn main() {
     println!("hi");
 }

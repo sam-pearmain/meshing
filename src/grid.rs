@@ -44,7 +44,7 @@ impl Grid2D {
         let mut min_y: f64 = 0.0;
         let mut max_y: f64 = 0.0;
 
-        for point in self.points {
+        for point in self.points.iter() {
             if point.x < min_x {
                 min_x = point.x;
             } else if point.x > max_x {
@@ -70,7 +70,7 @@ impl Grid2D {
 
         // check if we are at the maximum (i, j) as defined by nx and ny, return none if we are
         if last.i == self.nx - 1 && last.j == self.ny - 1 {
-            None
+            return None
         } 
 
         // find the proceeding i and j values depending on what point was the last in the vec
@@ -81,7 +81,7 @@ impl Grid2D {
             next_i = 0;
             next_j = last.j + 1;
         } else {
-            next_i = last_i + 1;
+            next_i = last.i + 1;
             next_j = last.j;
         }
 

@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use num_complex::Complex;
+
 pub struct Cartesian2D {
     x: f64,
     y: f64,
@@ -73,6 +75,72 @@ impl Polynomial {
     }
 }
 
+impl Polynomial {
+    pub fn roots(&self) -> Vec<Complex<f64>> {
+        // if order is 0, there's no root to compute
+        let n = self.order();
+        if n == 0 {
+            return vec![];
+        }
+
+        // convert polynomial to monic form
+        // coefficients are assumed in descending order: a0 x^n + a1 x^(n-1) + ... + a{n}
+        let leading = self.coefs[0];
+        // build monic coefficients as complex numbers
+        let b: Vec<Complex<f64>> = self.coefs
+            .iter()
+            .map(|&c| Complex::new(c / leading, 0.0))
+            .collect();
+
+        // initialize roots with equally spaced points on a circle.
+        // using a small radius may help with convergence.
+        let n_usize = n;
+        let mut roots: Vec<Complex<f64>> = (0..n_usize)
+            .map(|k| {
+                let theta = 2.0 * std::f64::consts::PI * k as f64 / n_usize as f64;
+                // initial guess; adjust the radius as needed
+                Complex::from_polar(&1.0, &theta)
+            })
+            .collect();
+
+        let max_iters = 1000;
+        let tol = 1e-8;
+
+        for _ in 0..max_iters {
+            let mut converged = true;
+            let mut new_roots = roots.clone();
+            for i in 0..n_usize {
+                let r_i = roots[i];
+
+                // evaluate the monic polynomial at r_i:
+                // p(r) = r^n + b[1]*r^(n-1) + ... + b[n]
+                let mut p_val = Complex::new(1.0, 0.0);
+                for coef in b.iter().skip(1) {
+                    p_val = p_val * r_i + coef;
+                }
+
+                // compute the product prod_{j != i} (r_i - r_j)
+                let prod = roots.iter().enumerate()
+                    .filter(|(j, _)| *j != i)
+                    .fold(Complex::new(1.0, 0.0), |acc, (_, &r_j)| acc * (r_i - r_j));
+
+                // avoid division by zero, update the root
+                let delta = p_val / prod;
+                new_roots[i] = r_i - delta;
+                if delta.norm() > tol {
+                    converged = false;
+                }
+            }
+            roots = new_roots;
+            if converged {
+                break;
+            }
+        }
+
+        roots
+    }
+}
+
 impl Line2D for Polynomial {
     fn eqn(&self) -> impl Fn(f64) -> f64 {
         let coefs: Vec<f64> = self.coefs.clone();
@@ -136,6 +204,11 @@ impl std::fmt::Debug for Polynomial {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self)
     }
+}
+
+// b-spline stuff // 
+pub struct BSpline {
+
 }
 
 #[cfg(test)]

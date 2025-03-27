@@ -7,8 +7,10 @@ pub struct Cartesian2D {
 
 pub trait Line2D {
     fn eqn(&self) -> impl Fn(f64) -> f64;
+    fn solve(&self, x: f64) -> f64;
 }
 
+// straight line stuff //
 pub struct StraightLine2D {
     m: f64, // gradient
     c: f64, // y-intercept
@@ -30,7 +32,31 @@ impl Line2D for StraightLine2D {
     fn eqn(&self) -> impl Fn(f64) -> f64 {
         move |x: f64| self.m * x + self.c
     }
+
+    fn solve(&self, x: f64) -> f64 {
+        (self.eqn())(x)
+    }
 } 
+
+impl std::fmt::Display for StraightLine2D {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.m != 0.0 && self.c != 0.0 {
+            write!(f, "y = {:.2}x + {:.2}", self.m, self.c)
+        } else if self.m != 0.0 && self.c == 0.0 {
+            write!(f, "y = {:.2}x", self.m)
+        } else if self.m == 0.0 && self.c != 0.0 {
+            write!(f, "y = {:.2}", self.c)
+        } else {
+            write!(f, "y = 0")
+        }
+    }
+}
+
+impl std::fmt::Debug for StraightLine2D {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
 
 // polynomial stuff // 
 pub struct Polynomial {
@@ -58,6 +84,10 @@ impl Line2D for Polynomial {
             y
         }
     }
+
+    fn solve(&self, x: f64) -> f64 {
+        (self.eqn())(x)
+    }
 }
 
 impl std::fmt::Display for Polynomial {
@@ -68,22 +98,34 @@ impl std::fmt::Display for Polynomial {
             if coeff == 0.0 {
                 continue;
             }
-            if !first_term {
-                write!(f, " + ")?;
-            }
-            first_term = false;
-            let power: usize = order - i;
-            if power == 0 {
-                write!(f, "{:.2}", coeff)?;
-            } else if power == 1 {
-                write!(f, "{:.2}x", coeff)?;
+
+            if first_term {
+                write!(f, "y = ")?;
+                first_term = false;
+                if coeff < 0.0 {
+                    write!(f, "-")?;
+                }
             } else {
-                write!(f, "{:.2}x^{}", coeff, power)?;
+                if coeff > 0.0 {
+                    write!(f, " + ")?;
+                } else {
+                    write!(f, " - ")?;
+                }
+            }
+            
+            let power: usize = order - i;
+
+            if power == 0 {
+                write!(f, "{:.2}", coeff.abs())?;
+            } else if power == 1 {
+                write!(f, "{:.2}x", coeff.abs())?;
+            } else {
+                write!(f, "{:.2}x^{}", coeff.abs(), power)?;
             }
         }
 
         if first_term {
-            write!(f, "0")?;
+            write!(f, "y = 0")?;
         }
 
         Ok(())
@@ -93,5 +135,24 @@ impl std::fmt::Display for Polynomial {
 impl std::fmt::Debug for Polynomial {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn print_straight_line() {
+        let line1 = StraightLine2D::new(2.0, 3.0);
+        let line2 = StraightLine2D::new(1.0, 0.0);
+        println!("{}", line1);
+        println!("{}", line2);
+    }
+
+    #[test]
+    fn print_poly() {
+        let poly = Polynomial::new(vec![1.0, 2.0, -3.0, 4.0]);
+        println!("{}", poly);
     }
 }

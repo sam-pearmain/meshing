@@ -230,7 +230,8 @@ pub struct BSpline {
 impl BSpline {
     pub fn lsq(data_points: Vec<Cartesian2D>, degree: usize, n_control_points: usize) -> Self {
         assert!(data_points.len() > degree, "number of data points must be greater than the degree");
-        assert!(n_control_points > degree, "number of control points must be greater than the degree")
+        assert!(n_control_points > degree, "number of control points must be greater than the degree");
+        
         todo!()
     }
 }

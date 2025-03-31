@@ -1,98 +1,91 @@
 #![allow(dead_code)]
 
+use std::fmt::Debug;
+use num::Num;
+
+pub trait Scalar: Num + Clone + Copy + Default + Debug {}
+
+impl Scalar for f32   {}
+impl Scalar for f64   {}
+impl Scalar for i8    {}
+impl Scalar for i16   {}
+impl Scalar for i32   {}
+impl Scalar for i64   {}
+impl Scalar for i128  {}
+impl Scalar for u8    {}
+impl Scalar for u16   {}
+impl Scalar for u32   {}
+impl Scalar for u64   {}
+impl Scalar for u128  {}
+impl Scalar for usize {}
+
 #[derive(Debug, Clone)]
-pub struct Matrix {
-    data: Vec<f64>,
-    rows: usize,
-    cols: usize, 
+pub struct Matrix<S: Scalar, const ROWS: usize, const COLS: usize> {
+    data: Vec<S>,
 }
 
-impl Matrix {
-    pub fn new(nrows: usize, ncols: usize) -> Self {
-        Matrix { 
-            data: vec![0.0; nrows * ncols],
-            rows: nrows,
-            cols: ncols, 
-        }
-    }
+type RowVector<S: Scalar, const COLS: usize> = Matrix<S, 1, COLS>;
+type ColumnVector<S: Scalar, const ROWS: usize> = Matrix<S, ROWS, 1>;
+type SquareMatrix<S: Scalar, const DIMS: usize> = Matrix<S, DIMS, DIMS>;
+type Vector<S: Scalar, const LENGTH: usize> = ColumnVector<S, LENGTH>;
 
-    pub fn fill(&mut self, value: f64) {
-        for element in self.data.iter_mut() {
-            *element = value;
-        }
-    }
+impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Display for Matrix<S, ROWS, COLS> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in 0..ROWS {
+            for j in 0..ROWS {
 
-    pub fn element(&self, row: usize, col: usize) -> f64 {
-        self.data[row * self.cols + col]
-    }
-
-    
-}
-
-impl std::ops::Add for Matrix {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        if self.rows != rhs.rows || self.cols != rhs.cols {
-            panic!("matrices must have same dimensions for addition");
-        }
-
-        let data: Vec<f64> = self.data.clone()
-            .iter()
-            .zip(rhs.data.iter())
-            .map(|(a, b)| a + b)
-            .collect();
-
-        Matrix {
-            data, 
-            rows: self.rows,
-            cols: self.cols,
-        }
-    }
-}
-
-impl std::ops::Sub for Matrix {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        if self.rows != rhs.rows || self.cols != rhs.cols {
-            panic!("matrices must have same dimensions for subtraction");
-        }
-
-        let data: Vec<f64> = self.data.clone()
-            .iter()
-            .zip(rhs.data.iter())
-            .map(|(a, b)| a - b)
-            .collect();
-
-        Matrix {
-            data, 
-            rows: self.rows,
-            cols: self.cols,
-        }
-    }
-}
-
-impl std::ops::Mul for Matrix {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        if self.cols != rhs.rows {
-            panic!("number of columns in the first matrix must equal the number of rows in the second matrix for multiplication");
-        }
-
-        let mut result = Matrix::new(self.rows, rhs.cols);
-
-        for i in 0..self.rows {
-            for j in 0..rhs.cols {
-                let mut sum = 0.0;
-                for k in 0..self.cols {
-                    sum += self.element(i, k) * rhs.element(k, j);
-                }
-                result.data[i * rhs.cols + j] = sum;
             }
         }
+        todo!()
+    }
+} 
 
-        result
+impl<S: Scalar, const ROWS: usize, const COLS: usize> Matrix<S, ROWS, COLS> {
+    pub fn new() -> Self {
+        Matrix { data: vec![S::default(); ROWS * COLS], }
+    }
+
+    pub fn zeros() -> Self {
+        Matrix { data: vec![S::zero(); ROWS * COLS], }
+    }
+
+    pub fn ones() -> Self {
+        Matrix { data: vec![S::one(); ROWS * COLS], }
+    }
+
+    pub fn rows(&self) -> usize {
+        ROWS
+    }
+
+    pub fn cols(&self) -> usize {
+        COLS
+    }
+
+    pub fn dims(&self) -> (usize, usize) {
+        (ROWS, COLS)
+    }
+}
+
+impl<S: Scalar, const DIMS: usize> SquareMatrix<S, DIMS> {
+    fn identity() -> Self {
+        let mut data = vec![S::zero(); DIMS * DIMS];
+        for i in 0..DIMS {
+            data[i * DIMS + i] = S::one();
+        }
+        Matrix { data }
+    }
+} 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() {
+        let m = Matrix::<f64, 4, 4>::new();
+        println!("{:?}", m);
+
+        let m = Vector::<f32, 10>::ones();
+        println!("{:?}", m);
     }
 }

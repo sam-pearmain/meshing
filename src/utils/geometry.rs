@@ -11,11 +11,11 @@ pub struct Cartesian2D {
 pub trait Line2D {
     fn eqn(&self) -> impl Fn(f64) -> f64;
     fn solve(&self, x: f64) -> f64;
-    fn plot(&self, file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-        self.plot_bounded((-10.0, 10.0), (-10.0, 10.0), file_name)
+    fn plot(&self) -> Result<(), Box<dyn std::error::Error>> {
+        self.plot_bounded((-10.0, 10.0))
     }
-    fn plot_bounded(&self, x_range: (f64, f64), y_range: (f64, f64), file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-        plot_injective_function(self.eqn(), x_range, y_range, file_name)
+    fn plot_bounded(&self, x_range: (f64, f64)) -> Result<(), Box<dyn std::error::Error>> {
+        plot_injective_function(self.eqn(), x_range)
     }
 }
 
@@ -308,7 +308,7 @@ mod tests {
         ]);
         let real_roots = poly.real_roots();
         println!("{:?}", real_roots);
-        poly.plot("poly.png").expect("erm");
+        // poly.plot().expect("erm");
     }
 
     #[test]

@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use num_complex::Complex;
-use crate::utils::plotting::plot_injective_function;
 
 pub struct Cartesian2D {
     x: f64,
@@ -15,7 +14,7 @@ pub trait Line2D {
         self.plot_bounded((-10.0, 10.0))
     }
     fn plot_bounded(&self, x_range: (f64, f64)) -> Result<(), Box<dyn std::error::Error>> {
-        plot_injective_function(self.eqn(), x_range)
+        todo!()
     }
 }
 
@@ -223,7 +222,17 @@ impl std::fmt::Debug for Polynomial {
 
 // b-spline stuff // 
 pub struct BSpline {
+    control_points: Vec<Cartesian2D>,
+    knots: Vec<f64>,
+    degree: usize,  
+}
 
+impl BSpline {
+    pub fn lsq(data_points: Vec<Cartesian2D>, degree: usize, n_control_points: usize) -> Self {
+        assert!(data_points.len() > degree, "number of data points must be greater than the degree");
+        assert!(n_control_points > degree, "number of control points must be greater than the degree")
+        todo!()
+    }
 }
 
 #[cfg(test)]

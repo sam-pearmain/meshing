@@ -24,10 +24,10 @@ pub struct Matrix<S: Scalar, const ROWS: usize, const COLS: usize> {
     data: Vec<S>,
 }
 
+type Vector<S: Scalar, const LENGTH: usize> = ColumnVector<S, LENGTH>;
 type RowVector<S: Scalar, const COLS: usize> = Matrix<S, 1, COLS>;
 type ColumnVector<S: Scalar, const ROWS: usize> = Matrix<S, ROWS, 1>;
 type SquareMatrix<S: Scalar, const DIMS: usize> = Matrix<S, DIMS, DIMS>;
-type Vector<S: Scalar, const LENGTH: usize> = ColumnVector<S, LENGTH>;
 
 impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Debug for Matrix<S, ROWS, COLS> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -62,6 +62,44 @@ impl<S: Scalar, const ROWS: usize, const COLS: usize> Matrix<S, ROWS, COLS> {
         Matrix { data: vec![S::one(); ROWS * COLS], }
     }
 
+    pub fn fill(value: S) -> Self {
+        Matrix { data: vec![value; ROWS * COLS], }
+    }
+
+    pub fn from_vec(data: &Vec<S>) -> Result<Self, &'static str> {
+        if data.len() != ROWS * COLS {
+            return Err("vec length does not match matrix dimensions");
+        }
+        Ok(Matrix { data: data.to_vec() })
+    }
+
+    pub fn get(&self, row: usize, col: usize) -> Result<S, &'static str> {
+        if row < ROWS && col < COLS {
+            Ok(self.data[row * COLS + col])
+        } else {
+            Err("index out of bounds")
+        }
+    }
+
+    pub fn set(&mut self, row: usize, col: usize, value: S) -> Result<(), &'static str> {
+        if row < ROWS && col < COLS {
+            self.data[row * COLS + col] = value;
+            Ok(())
+        } else {
+            Err("index out of bounds")
+        }
+    }
+
+    pub fn transpose(&self) -> Result<Matrix<S, COLS, ROWS>, &'static str> {
+        let mut transpose = Matrix::<S, COLS, ROWS>::zeros();
+        for i in 0..ROWS {
+            for j in 0..COLS {
+                transpose.set(j, i, self.get(i, j)?)?;
+            }
+        }
+        Ok(transpose)
+    }
+
     pub fn rows(&self) -> usize {
         ROWS
     }
@@ -84,6 +122,16 @@ impl<S: Scalar, const DIMS: usize> SquareMatrix<S, DIMS> {
         Matrix { data }
     }
 } 
+
+impl<S: Scalar + num::Signed, const DIMS: usize> SquareMatrix<S, DIMS> {
+    fn inverse(&self) -> Result<Self, &'static str> {
+        todo!()
+    }
+    
+    fn determinant(&self) -> S {
+        todo!()
+    }
+}
 
 pub struct AugmentedMatrix<S: Scalar, const DIMS: usize> {
     a: SquareMatrix<S, DIMS>,

@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use std::ops::{Div, Sub};
 use num::Num;
 
 pub trait Scalar: Num + Clone + Copy + Default + std::fmt::Debug {}
@@ -89,7 +90,7 @@ pub struct AugmentedMatrix<S: Scalar, const DIMS: usize> {
     b: Vector<S, DIMS>,
 }
 
-impl<S: Scalar, const DIMS: usize> AugmentedMatrix<S, DIMS> {
+impl<S: Scalar + Div<Output = S> + Sub<Output = S>, const DIMS: usize> AugmentedMatrix<S, DIMS> {
     fn assemble(a: &SquareMatrix<S, DIMS>, b: &Vector<S, DIMS>) -> Self {
         AugmentedMatrix { 
             a: a.clone(), 
@@ -97,8 +98,22 @@ impl<S: Scalar, const DIMS: usize> AugmentedMatrix<S, DIMS> {
         }
     }
     
-    fn solve() {
-        todo!()
+    fn lu_decomposition(&self) -> (SquareMatrix<S, DIMS>, SquareMatrix<S, DIMS>) {
+        let mut l = SquareMatrix::<S, DIMS>::identity();
+        let mut u = self.a.clone();
+
+        for i in 0..DIMS {
+            for j in i + 1..DIMS {
+                let factor = u.data[j * DIMS + i] / u.data[i * DIMS + i];
+                l.data[j * DIMS + i] = factor;
+
+                for k in i..DIMS {
+                    u.data[j * DIMS + k] = u.data[j * DIMS + k] - factor * u.data[i * DIMS + k];
+                }
+            }
+        }
+
+        (l, u)
     }
 }
 

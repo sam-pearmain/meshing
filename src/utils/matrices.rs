@@ -21,7 +21,7 @@ impl Scalar for usize {}
 
 #[derive(Clone)]
 pub struct Matrix<S: Scalar, const ROWS: usize, const COLS: usize> {
-    data: Vec<S>,
+    data: Vec<S>, // should probably change this to a &[S] for speed
 }
 
 type Vector<S, const LENGTH: usize> = ColumnVector<S, LENGTH>;
@@ -31,7 +31,7 @@ type SquareMatrix<S, const DIMS: usize> = Matrix<S, DIMS, DIMS>;
 
 impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Debug for Matrix<S, ROWS, COLS> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Matrix::{} [{}x{}]", std::any::type_name::<S>(), ROWS, COLS)?;
+        write!(f, "matrix::{} [{}x{}]", std::any::type_name::<S>(), ROWS, COLS)?;
         Ok(())
     }
 }
@@ -40,8 +40,7 @@ impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Display for Matr
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in 0..ROWS {
             for j in 0..COLS {
-                let index = i * COLS + j;
-                write!(f, " {:?} ", self.data[index])?;
+                write!(f, " {:?} ", self[(i, j)])?;
             }
             write!(f, "\n")?;
         }
@@ -73,28 +72,11 @@ impl<S: Scalar, const ROWS: usize, const COLS: usize> Matrix<S, ROWS, COLS> {
         Ok(Matrix { data: data.to_vec() })
     }
 
-    pub fn get(&self, row: usize, col: usize) -> Result<S, &'static str> {
-        if row < ROWS && col < COLS {
-            Ok(self.data[row * COLS + col])
-        } else {
-            Err("index out of bounds")
-        }
-    }
-
-    pub fn set(&mut self, row: usize, col: usize, value: S) -> Result<(), &'static str> {
-        if row < ROWS && col < COLS {
-            self.data[row * COLS + col] = value;
-            Ok(())
-        } else {
-            Err("index out of bounds")
-        }
-    }
-
     pub fn transpose(&self) -> Result<Matrix<S, COLS, ROWS>, &'static str> {
         let mut transpose = Matrix::<S, COLS, ROWS>::zeros();
         for i in 0..ROWS {
             for j in 0..COLS {
-                transpose.set(j, i, self.get(i, j)?)?;
+                transpose[(j, i)] = self[(i, j)];
             }
         }
         Ok(transpose)
@@ -208,6 +190,20 @@ impl<S: Scalar, const ROWS: usize, const COMMON: usize, const COLS: usize> std::
     }
 }
 
+impl<S: Scalar, const ROWS: usize, const COLS: usize> std::ops::Index<(usize, usize)> for Matrix<S, ROWS, COLS> {
+    type Output = S;
+
+    fn index(&self, ij: (usize, usize)) -> &Self::Output {
+        self.data.index(ij.0 * COLS + ij.1)
+    }
+}
+
+impl<S: Scalar, const ROWS: usize, const COLS: usize> std::ops::IndexMut<(usize, usize)> for Matrix<S, ROWS, COLS> {
+    fn index_mut(&mut self, ij: (usize, usize)) -> &mut Self::Output {
+        self.data.index_mut(ij.0 * COLS + ij.1)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -218,7 +214,10 @@ mod tests {
         println!("{}", m);
 
         let m = Vector::<f32, 10>::ones();
-        println!("{:?}", m);
+        println!("{:?}", m.clone());
+
+        let m1 = m[(1, 1)];
+        println!("{}", m1);
     }
 
     #[test]

@@ -2,8 +2,8 @@
 pub struct GridPoint2D {
     i: usize, 
     j: usize, 
-    x: f64,
-    y: f64,
+    x: f64, 
+    y: f64, 
 }
 
 impl GridPoint2D {

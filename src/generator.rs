@@ -1,14 +1,3 @@
-use crate::utils::geometry::*;
+use std::marker::PhantomData;
+use num::Float;
 
-pub struct GridGenerator2D<T: Line2D> {
-    north: T,
-    south: T,
-    east: T,
-    west: T,
-}
-
-impl<T: Line2D> GridGenerator2D<T> {
-    fn new() {
-
-    }
-}

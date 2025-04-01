@@ -1,6 +1,7 @@
 mod grid;
 mod generator;
 mod utils;
+mod point;
 
 fn main() {
     println!("hi");

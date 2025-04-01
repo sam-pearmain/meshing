@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 
-use std::fmt::Debug;
 use num::Num;
 
-pub trait Scalar: Num + Clone + Copy + Default + Debug {}
+pub trait Scalar: Num + Clone + Copy + Default + std::fmt::Debug {}
 
 impl Scalar for f32   {}
 impl Scalar for f64   {}
@@ -19,7 +18,7 @@ impl Scalar for u64   {}
 impl Scalar for u128  {}
 impl Scalar for usize {}
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Matrix<S: Scalar, const ROWS: usize, const COLS: usize> {
     data: Vec<S>,
 }
@@ -29,14 +28,23 @@ type ColumnVector<S: Scalar, const ROWS: usize> = Matrix<S, ROWS, 1>;
 type SquareMatrix<S: Scalar, const DIMS: usize> = Matrix<S, DIMS, DIMS>;
 type Vector<S: Scalar, const LENGTH: usize> = ColumnVector<S, LENGTH>;
 
+impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Debug for Matrix<S, ROWS, COLS> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Matrix::{} [{}x{}]", std::any::type_name::<S>(), ROWS, COLS)?;
+        Ok(())
+    }
+}
+
 impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Display for Matrix<S, ROWS, COLS> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in 0..ROWS {
-            for j in 0..ROWS {
-
+            for j in 0..COLS {
+                let index = i * COLS + j;
+                write!(f, " {:?} ", self.data[index])?;
             }
+            write!(f, "\n")?;
         }
-        todo!()
+        Ok(())
     }
 } 
 
@@ -76,6 +84,24 @@ impl<S: Scalar, const DIMS: usize> SquareMatrix<S, DIMS> {
     }
 } 
 
+pub struct AugmentedMatrix<S: Scalar, const DIMS: usize> {
+    a: SquareMatrix<S, DIMS>,
+    b: Vector<S, DIMS>,
+}
+
+impl<S: Scalar, const DIMS: usize> AugmentedMatrix<S, DIMS> {
+    fn assemble(a: &SquareMatrix<S, DIMS>, b: &Vector<S, DIMS>) -> Self {
+        AugmentedMatrix { 
+            a: a.clone(), 
+            b: b.clone(), 
+        }
+    }
+    
+    fn solve() {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,7 +109,7 @@ mod tests {
     #[test]
     fn test() {
         let m = Matrix::<f64, 4, 4>::new();
-        println!("{:?}", m);
+        println!("{}", m);
 
         let m = Vector::<f32, 10>::ones();
         println!("{:?}", m);

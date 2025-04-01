@@ -24,10 +24,10 @@ pub struct Matrix<S: Scalar, const ROWS: usize, const COLS: usize> {
     data: Vec<S>,
 }
 
-type Vector<S: Scalar, const LENGTH: usize> = ColumnVector<S, LENGTH>;
-type RowVector<S: Scalar, const COLS: usize> = Matrix<S, 1, COLS>;
-type ColumnVector<S: Scalar, const ROWS: usize> = Matrix<S, ROWS, 1>;
-type SquareMatrix<S: Scalar, const DIMS: usize> = Matrix<S, DIMS, DIMS>;
+type Vector<S, const LENGTH: usize> = ColumnVector<S, LENGTH>;
+type RowVector<S, const COLS: usize> = Matrix<S, 1, COLS>;
+type ColumnVector<S, const ROWS: usize> = Matrix<S, ROWS, 1>;
+type SquareMatrix<S, const DIMS: usize> = Matrix<S, DIMS, DIMS>;
 
 impl<S: Scalar, const ROWS: usize, const COLS: usize> std::fmt::Debug for Matrix<S, ROWS, COLS> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -219,5 +219,32 @@ mod tests {
 
         let m = Vector::<f32, 10>::ones();
         println!("{:?}", m);
+    }
+
+    #[test]
+    fn test_add() {
+        let m1 = Matrix::<i32, 2, 2>::from_vec(&vec![1, 2, 3, 4]).unwrap();
+        let m2 = Matrix::<i32, 2, 2>::from_vec(&vec![5, 6, 7, 8]).unwrap();
+        let result = m1 + m2;
+        let expected = Matrix::<i32, 2, 2>::from_vec(&vec![6, 8, 10, 12]).unwrap();
+        assert_eq!(result.data, expected.data);
+    }
+
+    #[test]
+    fn test_sub() {
+        let m1 = Matrix::<i32, 2, 2>::from_vec(&vec![5, 6, 7, 8]).unwrap();
+        let m2 = Matrix::<i32, 2, 2>::from_vec(&vec![1, 2, 3, 4]).unwrap();
+        let result = m1 - m2;
+        let expected = Matrix::<i32, 2, 2>::from_vec(&vec![4, 4, 4, 4]).unwrap();
+        assert_eq!(result.data, expected.data);
+    }
+
+    #[test]
+    fn test_mul() {
+        let m1 = Matrix::<i32, 2, 3>::from_vec(&vec![1, 2, 3, 4, 5, 6]).unwrap();
+        let m2 = Matrix::<i32, 3, 2>::from_vec(&vec![7, 8, 9, 10, 11, 12]).unwrap();
+        let result = m1 * m2;
+        let expected = Matrix::<i32, 2, 2>::from_vec(&vec![58, 64, 139, 154]).unwrap();
+        assert_eq!(result.data, expected.data);
     }
 }

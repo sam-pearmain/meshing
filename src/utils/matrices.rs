@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use std::ops::{Div, Sub};
-use num::Num;
+use num::{Num, Signed};
 
 pub trait Scalar: Num + Clone + Copy + Default + std::fmt::Debug {}
 
@@ -162,6 +162,49 @@ impl<S: Scalar + Div<Output = S> + Sub<Output = S>, const DIMS: usize> Augmented
         }
 
         (l, u)
+    }
+}
+
+impl<S: Scalar, const ROWS: usize, const COLS: usize> std::ops::Add for Matrix<S, ROWS, COLS> {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let data = self.data
+            .iter()
+            .zip(rhs.data.iter())
+            .map(|(a, b)| *a + *b)
+            .collect();
+        Matrix { data }
+    }
+}
+
+impl<S: Scalar + Signed, const ROWS: usize, const COLS: usize> std::ops::Sub for Matrix<S, ROWS, COLS> {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let data = self.data
+            .iter()
+            .zip(rhs.data.iter())
+            .map(|(a, b)| *a - *b)
+            .collect();
+        Matrix { data }
+    }
+}
+
+impl<S: Scalar, const ROWS: usize, const COMMON: usize, const COLS: usize> std::ops::Mul<Matrix<S, COMMON, COLS>> for Matrix<S, ROWS, COMMON> {
+    type Output = Matrix<S, ROWS, COLS>;
+
+    fn mul(self, rhs: Matrix<S, COMMON, COLS>) -> Self::Output {
+        let mut result = vec![S::zero(); ROWS * COLS];
+        for i in 0..ROWS {
+            for j in 0..COLS {
+                for k in 0..COMMON {
+                    result[i * COLS + j] = result[i * COLS + j]
+                        + self.data[i * COMMON + k] * rhs.data[k * COLS + j];
+                }
+            }
+        }
+        Matrix { data: result }
     }
 }
 

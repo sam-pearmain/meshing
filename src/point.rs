@@ -18,6 +18,8 @@ impl Coordinate for u64   {}
 impl Coordinate for u128  {}
 impl Coordinate for usize {}
 
+
+// a statically allocated point struct that lives on the stack
 #[derive(PartialEq, PartialOrd)]
 pub struct Point<T: Coordinate, const DIMS: usize> {
     coords: [T; DIMS],
@@ -96,9 +98,81 @@ impl<T: Coordinate + Signed, const DIMS: usize> std::ops::Sub for Point<T, DIMS>
     }
 }
 
+// a dynamically allocated point that lives on the heap
+#[derive(PartialEq, PartialOrd)]
+pub struct DynamicPoint<T: Coordinate> {
+    coords: Vec<T>,
+}
+
+impl<T: Coordinate> std::fmt::Debug for DynamicPoint<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "point::{}, {:?}", std::any::type_name::<T>(), &self.coords)
+    }
+}
+
+impl<T: Coordinate + Display> std::fmt::Display for DynamicPoint<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let coords_string = self.coords.iter()
+            .map(|c| c.to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        write!(f, "({})", coords_string)
+    }
+}
+
+impl<T: Coordinate> DynamicPoint<T> {
+    pub fn new(dimensions: usize) -> Self {
+        DynamicPoint { coords: vec![T::default(); dimensions] }
+    }
+
+    pub fn origin(dimensions: usize) -> Self {
+        DynamicPoint { coords: vec![T::zero(); dimensions] }
+    }
+
+    pub fn from(coords: impl Into<Vec<T>>) -> Self {
+        DynamicPoint { coords: coords.into() }
+    }
+
+    pub fn dimensions(&self) -> usize {
+        self.coords.len()
+    }
+}
+
+impl<T: Coordinate> std::ops::Add for DynamicPoint<T> {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let mut coords = Vec::new();
+        for (i, (&a, &b)) in self.coords.iter().zip(rhs.coords.iter()).enumerate() {
+            coords[i] = a + b;
+        }
+        DynamicPoint { coords }
+    }
+}
+
+impl<T: Coordinate + Signed> std::ops::Sub for DynamicPoint<T> {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let mut coords = Vec::new();
+        for (i, (&a, &b)) in self.coords.iter().zip(rhs.coords.iter()).enumerate() {
+            coords[i] = a - b;
+        }
+        DynamicPoint { coords }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test() {
+        for i in 0..3 {
+            let p = DynamicPoint::<f64>::new(i);
+            println!("{}", p);
+        }
+    }
 
     #[test]
     fn test_point_creation() {

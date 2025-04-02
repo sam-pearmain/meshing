@@ -98,7 +98,21 @@ impl<T: Coordinate + Signed, const DIMS: usize> std::ops::Sub for Point<T, DIMS>
     }
 }
 
-// a dynamically allocated point that lives on the heap
+impl<T: Coordinate, const DIMS: usize> std::ops::Index<usize> for Point<T, DIMS> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.coords[index]
+    }
+}
+
+impl<T: Coordinate, const DIMS: usize> std::ops::IndexMut<usize> for Point<T, DIMS> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.coords[index]       
+    }
+}
+
+// a dynamically allocated point that lives on the heap //
 #[derive(PartialEq, PartialOrd)]
 pub struct DynamicPoint<T: Coordinate> {
     coords: Vec<T>,
@@ -159,6 +173,20 @@ impl<T: Coordinate + Signed> std::ops::Sub for DynamicPoint<T> {
             coords[i] = a - b;
         }
         DynamicPoint { coords }
+    }
+}
+
+impl<T: Coordinate> std::ops::Index<usize> for DynamicPoint<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.coords[index]
+    }
+}
+
+impl<T: Coordinate> std::ops::IndexMut<usize> for DynamicPoint<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.coords[index]       
     }
 }
 
